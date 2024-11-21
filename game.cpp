@@ -104,63 +104,68 @@ void iDraw() {
     for(int s=0; s<numSect; s++){
         
         S[s].d=0;
-        for(int w=S[s].ws; w<S[s].we; w++){
+        for(int i=0; i<2; i++){
 
-            x1[0] = W[w].wx0 - mx;
-            x1[1] = W[w].wx1 - mx;
-            y1_new[0] = W[w].wy0 - my;
-            y1_new[1] = W[w].wy1 - my;
-            z1[0] = S[s].wz1 - mz;
-            z1[1] = S[s].wz1 - mz;
+            for(int w=S[s].ws; w<S[s].we; w++){
 
-            px[0] = (x1[0] * cos(t) - y1_new[0] * sin(t));
-            px[1] = (x1[1] * cos(t) - y1_new[1] * sin(t));
-            px[2] = px[0];
-            px[3] = px[1];
+                x1[0] = W[w].wx0 - mx;
+                x1[1] = W[w].wx1 - mx;
+                y1_new[0] = W[w].wy0 - my;
+                y1_new[1] = W[w].wy1 - my;
+                z1[0] = S[s].wz1 - mz;
+                z1[1] = S[s].wz1 - mz;
 
-            py[0] = (y1_new[0] * cos(t) + x1[0] * sin(t));
-            py[1] = (y1_new[1] * cos(t) + x1[1] * sin(t));
-            py[2]=py[0];
-            py[3]=py[1];
+                if(i==0) {int temp=x1[0]; x1[0]=x1[1]; x1[1]=temp; temp=y1_new[0]; y1_new[0]=y1_new[1]; y1_new[1]=temp;} 
 
-            S[s].d += dist(0,0, (px[0]+px[1])/2, (py[0]+py[1])/2 );
+                px[0] = (x1[0] * cos(t) - y1_new[0] * sin(t));
+                px[1] = (x1[1] * cos(t) - y1_new[1] * sin(t));
+                px[2] = px[0];
+                px[3] = px[1];
 
-            pz[0] = z1[0] + (g * py[0] / 32.0);
-            pz[1] = z1[1] + (g * py[1] / 32.0);
-            pz[2] = pz[0] + S[s].wz2;
-            pz[3] = pz[1] + S[s].wz2;
-            
-            if(py[0]<1 && py[1]<1){continue;}
-            if(py[0]<1){
+                py[0] = (y1_new[0] * cos(t) + x1[0] * sin(t));
+                py[1] = (y1_new[1] * cos(t) + x1[1] * sin(t));
+                py[2]=py[0];
+                py[3]=py[1];
 
-                clipBehindPlayer(&px[0],&py[0],&pz[0],px[1],py[1],pz[1]);
-                clipBehindPlayer(&px[2],&py[2],&pz[2],px[3],py[3],pz[3]);
+                S[s].d += dist(0,0, (px[0]+px[1])/2, (py[0]+py[1])/2 );
 
+                pz[0] = z1[0] + (g * py[0] / 32.0);
+                pz[1] = z1[1] + (g * py[1] / 32.0);
+                pz[2] = pz[0] + S[s].wz2;
+                pz[3] = pz[1] + S[s].wz2;
+                
+                if(py[0]<1 && py[1]<1){continue;}
+                if(py[0]<1){
+
+                    clipBehindPlayer(&px[0],&py[0],&pz[0],px[1],py[1],pz[1]);
+                    clipBehindPlayer(&px[2],&py[2],&pz[2],px[3],py[3],pz[3]);
+
+                }
+
+                if(py[1]<1){
+
+                    clipBehindPlayer(&px[1],&py[1],&pz[1],px[0],py[0],pz[0]);
+                    clipBehindPlayer(&px[3],&py[3],&pz[3],px[2],py[2],pz[2]);
+
+                }
+
+                sx[0] = (px[0]* 200) / py[0]  + 200; 
+                sx[1] = (px[1]* 200) / py[1]  + 200;
+                sz[0] = (pz[0]* 200) / py[0]  + 200;
+                sz[1] = (pz[1]* 200) / py[1]  + 200;
+                //these two lines are later additions for a wall
+                sz[2] = (pz[2]* 200) / py[0]  + 200;
+                sz[3] = (pz[3]* 200) / py[1]  + 200;
+
+                /*iPoint(sx[0], sz[0]); 
+                iPoint(sx[1], sz[1]);*/                         //made redundant by the iDrawLine
+
+                /*iDrawLine(sx[0],sx[1],sz[0],sz[1]);
+                iDrawLine(sx[0],sx[1],sz[2],sz[3]);*/           //made redundant by the iDrawWall 
+                iDrawWall(sx[0],sx[1],sz[0],sz[1],sz[2],sz[3],W[w].red,W[w].green,W[w].blue);
             }
-
-            if(py[1]<1){
-
-                clipBehindPlayer(&px[1],&py[1],&pz[1],px[0],py[0],pz[0]);
-                clipBehindPlayer(&px[3],&py[3],&pz[3],px[2],py[2],pz[2]);
-
-            }
-
-            sx[0] = (px[0]* 200) / py[0]  + 200; 
-            sx[1] = (px[1]* 200) / py[1]  + 200;
-            sz[0] = (pz[0]* 200) / py[0]  + 200;
-            sz[1] = (pz[1]* 200) / py[1]  + 200;
-            //these two lines are later additions for a wall
-            sz[2] = (pz[2]* 200) / py[0]  + 200;
-            sz[3] = (pz[3]* 200) / py[1]  + 200;
-
-            /*iPoint(sx[0], sz[0]); 
-            iPoint(sx[1], sz[1]);*/                         //made redundant by the iDrawLine
-
-            /*iDrawLine(sx[0],sx[1],sz[0],sz[1]);
-            iDrawLine(sx[0],sx[1],sz[2],sz[3]);*/           //made redundant by the iDrawWall 
-            iDrawWall(sx[0],sx[1],sz[0],sz[1],sz[2],sz[3],W[w].red,W[w].green,W[w].blue);
+            S[s].d/=(S[s].we-S[s].ws);    
         }
-        S[s].d/=(S[s].we-S[s].ws);    
     }
 }
 
