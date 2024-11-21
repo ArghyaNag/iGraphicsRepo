@@ -92,6 +92,14 @@ void iDraw() {
     int ax[2] = {40, 40}, ay[2] = {10, 290}, az[2] = {0, 0};
     int x1[2], y1_new[2], z1[2];
     int px[4], py[4], pz[4];
+
+    for(int s=0;s<numSect-1;s++){    
+        for(int w=0;w<numSect-s-1;w++){
+            if(S[w].d<S[w+1].d){ 
+                sectors stemp=S[w]; S[w]=S[w+1]; S[w+1]=stemp; 
+            }
+        }
+    }
     
     for(int s=0; s<numSect; s++){
         
