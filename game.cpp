@@ -1,45 +1,59 @@
 #include "iGraphics.h"
 #include<algorithm>
-    
+
+    int sx[2], sz[4];
     int mx, my , mz ;
     float t, g ;
-    int px[2], py[2], pz[4];
 
-void iDrawWall(int px0, int px1, int py0, int py1, int pz0, int pz1);
+void iDrawLine(int sx0, int sx1, int sz0, int sz1);
+void iDrawWall(int sx0, int sx1, int sz0, int sz1, int sz2, int sz3);
+void clipBehindPlayer(int *x1,int *y1,int *z1, int x2,int y2,int z2);
 
 void iDraw() {
     iClear();
     iSetColor(20, 200, 0);
-    iDrawWall(px[0],px[1],py[0],py[1],pz[0],pz[1]);
+
+    /*iPoint(sx[0], sz[0]); 
+    iPoint(sx[1], sz[1]);*/                         //made redundant by the iDrawLine
+
+    /*iDrawLine(sx[0],sx[1],sz[0],sz[1]);
+    iDrawLine(sx[0],sx[1],sz[2],sz[3]);*/           //made redundant by the iDrawWall 
+
+    iDrawWall(sx[0],sx[1],sz[0],sz[1],sz[2],sz[3]);
 }
 
+void iDrawLine(int sx0, int sx1, int sz0, int sz1) {
 
-void iDrawWall(int px0, int px1, int py0, int py1, int pz0, int pz1) {
-
-    int x,y,z;
-
-    for(x=px0; x<=px1; x++){
-        y = (py1-py0)*(x-px0+0.5)/(px1-px0)+py0;
-        z = (pz1-pz0)*(x-px0+0.5)/(px1-px0)+pz0;
-
-        if(y>0){
-
-            int screenx = (x*200)/y + 200;
-            int screenz = (z*200)/y + 200;
-
-            iPoint(screenx,screenz);
-        
-        }
-
+    for(int screenx=sx0; screenx<=sx1; screenx++)
+    {
+        int screenz = ((sz1-sz0)*(screenx-sx0+0.5))/(sx1-sx0)+sz0;
+        iPoint(screenx,screenz);
     }
 
 }
 
+void iDrawWall(int sx0, int sx1, int sz0, int sz1, int sz2, int sz3) {
 
+    int sx0backup=sx0;
+    int sx1backup=sx1;
+    
+    for(int screenx=sx0; screenx<=sx1; screenx++)
+    {
+        int screenz1 = ((sz1-sz0)*(screenx-sx0backup+0.5))/(sx1backup-sx0backup)+sz0;
+        int screenz2 = ((sz3-sz2)*(screenx-sx0backup+0.5))/(sx1backup-sx0backup)+sz2;
+
+        for(int screenz=screenz1; screenz<=screenz2; screenz++)
+        {
+            iPoint(screenx,screenz);
+        }
+    }
+
+    
+}
 
 void iKeyboard(unsigned char key) {
-	if (key == 'j') {t-=0.07; if(t<0){t+=6.3;}}
-    if( key == 'l') {t+=0.07; if(t>6.30){t-=6.3;}}
+	if (key == 'j') {t-=0.07; if(t<0){t+=6.30;}}
+    if( key == 'l') {t+=0.07; if(t>6.30){t-=6.30;}}
     if (key == 'i') {g-=1;}
     if (key == 'k') {g+=1;}
 
@@ -60,7 +74,7 @@ void pixelhishab() {
     
     int ax[2] = {40, 240}, ay[2] = {10, 10}, az[2] = {0, 0};
     int x1[2], y1_new[2], z1[2];
-    
+    int px[2], py[2], pz[4];
     
 
     x1[0] = ax[0] - mx;
@@ -79,6 +93,14 @@ void pixelhishab() {
     // these two lines are later additions for a wall
     pz[2] = pz[0] + 40;
     pz[3] = pz[1] + 40;
+
+    sx[0] = (px[0]* 200) / abs(py[0])  + 200; 
+    sx[1] = (px[1]* 200) / abs(py[1])  + 200;
+    sz[0] = (pz[0]* 200) / abs(py[0])  + 200;
+    sz[1] = (pz[1]* 200) / abs(py[1])  + 200;
+    //these two lines are later additions for a wall
+    sz[2] = (pz[2]* 200) / abs(py[0])  + 200;
+    sz[3] = (pz[3]* 200) / abs(py[1])  + 200;
 
 }
 
@@ -106,14 +128,14 @@ void iSpecialKeyboard(unsigned char key) {
 	//place your codes for other keys here
 }
 
-/*void check(){
+void check(){
     printf("x %d y %d z %d t %f g %f sx0 %d sz0 %d sx1 %d sz1 %d \n",mx,my,mz,t*57.3,g,sx[0],sz[0],sx[1],sz[1]);
-}*/
+}
 
 int main() {
 
     iSetTimer(5, pixelhishab);
-    //iSetTimer(3000, check);
+    iSetTimer(3000, check);
     mx=70,my=-110,mz=20;
     float t=0,g=0;
 
