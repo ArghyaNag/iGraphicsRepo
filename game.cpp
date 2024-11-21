@@ -1,13 +1,89 @@
 #include "iGraphics.h"
 #include<algorithm>
 
-    int sx[2], sz[4];
-    int mx, my , mz ;
-    float t, g ;
+int sx[2], sz[4];
+int mx, my , mz ;
+float t, g ;
+
+struct walls{
+    int wx0, wy0;
+    int wx1, wy1;
+    int red,green,blue;
+};
+
+int numWall=16;
+
+walls W[30];
+
+struct sectors{
+    int ws,we;
+    int wz1,wz2;
+    int cx,cy;
+    int d;
+};
+
+int numSect=4;
+
+sectors S[30];
+
+int loadSectors[]=
+{//wall start, wall end, z1 height, z2 height, bottom color, top color
+ 0,  4, 0, 40, 
+ 4,  8, 0, 40, 
+ 8, 12, 0, 40, 
+ 12,16, 0, 40, 
+};
+
+int loadWalls[]=
+{//x1,y1, x2,y2, color
+  0, 0, 32, 0, 255, 255, 0, 
+ 32, 0, 32,32, 160, 160, 0,
+ 32,32,  0,32, 255, 255, 0,
+  0,32,  0, 0, 160, 160, 0,
+
+ 64, 0, 96, 0, 0, 255, 0,
+ 96, 0, 96,32, 0, 160, 0,
+ 96,32, 64,32, 0, 255, 0,
+ 64,32, 64, 0, 0, 160, 0,
+
+ 64, 64, 96, 64, 0, 255, 255,
+ 96, 64, 96, 96, 0, 160, 160,
+ 96, 96, 64, 96, 0, 255, 255,
+ 64, 96, 64, 64, 0, 160, 160,
+
+  0, 64, 32, 64, 160, 100, 0,
+ 32, 64, 32, 96, 110, 50, 0,
+ 32, 96,  0, 96, 160, 100, 0,
+  0, 96,  0, 64, 110, 50, 0
+};
+
+void initwalls(){
+ int v1=0,v2=0;
+ for(int s=0;s<numSect;s++)
+ {
+  S[s].ws=loadSectors[v1+0];                   
+  S[s].we=loadSectors[v1+1];                   
+  S[s].wz1=loadSectors[v1+2];                  
+  S[s].wz2=loadSectors[v1+3]-loadSectors[v1+2];                   
+  v1+=4;
+  for(int w=S[s].ws;w<S[s].we;w++)
+  {
+   W[w].wx0=loadWalls[v2+0]; 
+   W[w].wy0=loadWalls[v2+1]; 
+   W[w].wx1=loadWalls[v2+2]; 
+   W[w].wy1=loadWalls[v2+3];
+   W[w].red =loadWalls[v2+4];
+   W[w].green =loadWalls[v2+5];
+   W[w].blue =loadWalls[v2+6]; 
+   v2+=7;
+  }
+ }
+  }
 
 void iDrawLine(int sx0, int sx1, int sz0, int sz1);
-void iDrawWall(int sx0, int sx1, int sz0, int sz1, int sz2, int sz3);
+void iDrawWall(int sx0, int sx1, int sz0, int sz1, int sz2, int sz3, int red, int green, int blue);
 void clipBehindPlayer(int *x1,int *y1,int *z1, int x2,int y2,int z2);
+int dist(int x1,int y1, int x2,int y2);
 
 
 void iDraw() {
@@ -17,59 +93,67 @@ void iDraw() {
     int x1[2], y1_new[2], z1[2];
     int px[4], py[4], pz[4];
     
+    for(int s=0; s<numSect; s++){
+        
+        S[s].d=0;
+        for(int w=S[s].ws; w<S[s].we; w++){
 
-    x1[0] = ax[0] - mx;
-    x1[1] = ax[1] - mx;
-    y1_new[0] = ay[0] - my;
-    y1_new[1] = ay[1] - my;
-    z1[0] = az[0] - mz;
-    z1[1] = az[1] - mz;
+            x1[0] = W[w].wx0 - mx;
+            x1[1] = W[w].wx1 - mx;
+            y1_new[0] = W[w].wy0 - my;
+            y1_new[1] = W[w].wy1 - my;
+            z1[0] = S[s].wz1 - mz;
+            z1[1] = S[s].wz1 - mz;
 
-    px[0] = (x1[0] * cos(t) - y1_new[0] * sin(t));
-    px[1] = (x1[1] * cos(t) - y1_new[1] * sin(t));
-    px[2] = px[0];
-    px[3] = px[1];
+            px[0] = (x1[0] * cos(t) - y1_new[0] * sin(t));
+            px[1] = (x1[1] * cos(t) - y1_new[1] * sin(t));
+            px[2] = px[0];
+            px[3] = px[1];
 
-    py[0] = (y1_new[0] * cos(t) + x1[0] * sin(t));
-    py[1] = (y1_new[1] * cos(t) + x1[1] * sin(t));
-    py[2]=py[0];
-    py[3]=py[1];
+            py[0] = (y1_new[0] * cos(t) + x1[0] * sin(t));
+            py[1] = (y1_new[1] * cos(t) + x1[1] * sin(t));
+            py[2]=py[0];
+            py[3]=py[1];
 
-    pz[0] = z1[0] + (g * py[0] / 32.0);
-    pz[1] = z1[1] + (g * py[1] / 32.0);
-    pz[2] = pz[0] + 40;
-    pz[3] = pz[1] + 40;
-    
-    if(py[0]<1 && py[1]<1){return;}
-    if(py[0]<1){
+            S[s].d += dist(0,0, (px[0]+px[1])/2, (py[0]+py[1])/2 );
 
-        clipBehindPlayer(&px[0],&py[0],&pz[0],px[1],py[1],pz[1]);
-        clipBehindPlayer(&px[2],&py[2],&pz[2],px[3],py[3],pz[3]);
+            pz[0] = z1[0] + (g * py[0] / 32.0);
+            pz[1] = z1[1] + (g * py[1] / 32.0);
+            pz[2] = pz[0] + S[s].wz2;
+            pz[3] = pz[1] + S[s].wz2;
+            
+            if(py[0]<1 && py[1]<1){continue;}
+            if(py[0]<1){
 
+                clipBehindPlayer(&px[0],&py[0],&pz[0],px[1],py[1],pz[1]);
+                clipBehindPlayer(&px[2],&py[2],&pz[2],px[3],py[3],pz[3]);
+
+            }
+
+            if(py[1]<1){
+
+                clipBehindPlayer(&px[1],&py[1],&pz[1],px[0],py[0],pz[0]);
+                clipBehindPlayer(&px[3],&py[3],&pz[3],px[2],py[2],pz[2]);
+
+            }
+
+            sx[0] = (px[0]* 200) / py[0]  + 200; 
+            sx[1] = (px[1]* 200) / py[1]  + 200;
+            sz[0] = (pz[0]* 200) / py[0]  + 200;
+            sz[1] = (pz[1]* 200) / py[1]  + 200;
+            //these two lines are later additions for a wall
+            sz[2] = (pz[2]* 200) / py[0]  + 200;
+            sz[3] = (pz[3]* 200) / py[1]  + 200;
+
+            /*iPoint(sx[0], sz[0]); 
+            iPoint(sx[1], sz[1]);*/                         //made redundant by the iDrawLine
+
+            /*iDrawLine(sx[0],sx[1],sz[0],sz[1]);
+            iDrawLine(sx[0],sx[1],sz[2],sz[3]);*/           //made redundant by the iDrawWall 
+            iDrawWall(sx[0],sx[1],sz[0],sz[1],sz[2],sz[3],W[w].red,W[w].green,W[w].blue);
+        }
+        S[s].d/=(S[s].we-S[s].ws);    
     }
-
-    if(py[1]<1){
-
-        clipBehindPlayer(&px[1],&py[1],&pz[1],px[0],py[0],pz[0]);
-        clipBehindPlayer(&px[3],&py[3],&pz[3],px[2],py[2],pz[2]);
-
-    }
-
-    sx[0] = (px[0]* 200) / py[0]  + 200; 
-    sx[1] = (px[1]* 200) / py[1]  + 200;
-    sz[0] = (pz[0]* 200) / py[0]  + 200;
-    sz[1] = (pz[1]* 200) / py[1]  + 200;
-    //these two lines are later additions for a wall
-    sz[2] = (pz[2]* 200) / py[0]  + 200;
-    sz[3] = (pz[3]* 200) / py[1]  + 200;
-
-    /*iPoint(sx[0], sz[0]); 
-    iPoint(sx[1], sz[1]);*/                         //made redundant by the iDrawLine
-
-    /*iDrawLine(sx[0],sx[1],sz[0],sz[1]);
-    iDrawLine(sx[0],sx[1],sz[2],sz[3]);*/           //made redundant by the iDrawWall 
-    iSetColor(20, 200, 0);
-    iDrawWall(sx[0],sx[1],sz[0],sz[1],sz[2],sz[3]);
 }
 
 void iDrawLine(int sx0, int sx1, int sz0, int sz1) {
@@ -82,8 +166,9 @@ void iDrawLine(int sx0, int sx1, int sz0, int sz1) {
 
 }
 
-void iDrawWall(int sx0, int sx1, int sz0, int sz1, int sz2, int sz3) {
+void iDrawWall(int sx0, int sx1, int sz0, int sz1, int sz2, int sz3, int red, int green, int blue) {
 
+    iSetColor(red,green,blue);
     int screenx,screenz;
 
     int dy = sz1 - sz0;
@@ -132,10 +217,18 @@ void iKeyboard(unsigned char key) {
     if(key == 'g') {mz-=4;}
 
 	}
+
 	
 void pixelhishab() {
 
 }
+
+int dist(int x1,int y1, int x2,int y2)
+{
+ int distance = sqrt( (x2-x1)*(x2-x1) + (y2-y1)*(y2-y1) );
+ return distance;
+}
+
 
 void clipBehindPlayer(int *x1,int *y1,int *z1, int x2,int y2,int z2) 
 {
@@ -178,6 +271,7 @@ void check(){
 
 int main() {
 
+    initwalls();
     iSetTimer(5, pixelhishab);
     iSetTimer(3000, check);
     mx=70,my=-110,mz=20;
