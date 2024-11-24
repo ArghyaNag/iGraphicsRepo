@@ -164,13 +164,13 @@ void iDraw() {
 
                 }
 
-                sx[0] = (px[0]* 200) / py[0]  + 960; 
-                sx[1] = (px[1]* 200) / py[1]  + 960;
-                sz[0] = (pz[0]* 200) / py[0]  + 520;
-                sz[1] = (pz[1]* 200) / py[1]  + 520;
+                sx[0] = (px[0]* 1100) / py[0]  + 960; 
+                sx[1] = (px[1]* 1100) / py[1]  + 960;
+                sz[0] = (pz[0]* 1100) / py[0]  + 520;
+                sz[1] = (pz[1]* 1100) / py[1]  + 520;
                 //these two lines are later additions for a wall
-                sz[2] = (pz[2]* 200) / py[0]  + 520;
-                sz[3] = (pz[3]* 200) / py[1]  + 520;
+                sz[2] = (pz[2]* 1100) / py[0]  + 520;
+                sz[3] = (pz[3]* 1100) / py[1]  + 520;
 
                 /*iPoint(sx[0], sz[0]); 
                 iPoint(sx[1], sz[1]);*/                         //made redundant by the iDrawLine
