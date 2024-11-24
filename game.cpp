@@ -21,7 +21,7 @@ struct sectors{
     int topred, topgreen, topblue;
     int bottomred, bottomgreen, bottomblue;
     int toporbottom;
-    int points[400];
+    int points[1920];
     int cx,cy;
     int d;
 };
@@ -164,13 +164,13 @@ void iDraw() {
 
                 }
 
-                sx[0] = (px[0]* 200) / py[0]  + 600; 
-                sx[1] = (px[1]* 200) / py[1]  + 600;
-                sz[0] = (pz[0]* 200) / py[0]  + 600;
-                sz[1] = (pz[1]* 200) / py[1]  + 600;
+                sx[0] = (px[0]* 200) / py[0]  + 960; 
+                sx[1] = (px[1]* 200) / py[1]  + 960;
+                sz[0] = (pz[0]* 200) / py[0]  + 520;
+                sz[1] = (pz[1]* 200) / py[1]  + 520;
                 //these two lines are later additions for a wall
-                sz[2] = (pz[2]* 200) / py[0]  + 600;
-                sz[3] = (pz[3]* 200) / py[1]  + 600;
+                sz[2] = (pz[2]* 200) / py[0]  + 520;
+                sz[3] = (pz[3]* 200) / py[1]  + 520;
 
                 /*iPoint(sx[0], sz[0]); 
                 iPoint(sx[1], sz[1]);*/                         //made redundant by the iDrawLine
@@ -206,8 +206,8 @@ void iDrawWall(int sx0, int sx1, int sz0, int sz1, int sz2, int sz3, int red, in
 
     if(sx0<1){sx0=1;}
     if(sx1<1){sx1=1;}
-    if(sx0>1199){sx0=1199;}
-    if(sx1>1199){sx1=1199;}
+    if(sx0>1920){sx0=1920;}
+    if(sx1>1920){sx1=1920;}
 
     for(screenx=sx0; screenx<sx1; screenx++){
 
@@ -216,8 +216,8 @@ void iDrawWall(int sx0, int sx1, int sz0, int sz1, int sz2, int sz3, int red, in
 
         if(screenz1<1){screenz1=1;}
         if(screenz2<1){screenz2=1;}
-        if(screenz1>1199){screenz1=1199;}
-        if(screenz2>1199){screenz2=1199;}
+        if(screenz1>1040){screenz1=1040;}
+        if(screenz2>1040){screenz2=1040;}
 
         if(S[s].toporbottom==1){ S[s].points[screenx]=screenz1; continue;}
         if(S[s].toporbottom==2){S[s].points[screenx]=screenz2; continue;}
@@ -308,6 +308,6 @@ int main() {
     mx=70,my=-110,mz=20;
     float t=0,g=0;
 
-    iInitialize(1200, 1200, "demo");
+    iInitialize(1920,1040, "demo");
     return 0;
 }
