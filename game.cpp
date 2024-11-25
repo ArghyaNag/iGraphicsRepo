@@ -11,7 +11,7 @@ struct walls{
     int red,green,blue;
 };
 
-int numWall=16;
+int numWall=4;
 
 walls W[30];
 
@@ -26,21 +26,24 @@ struct sectors{
     int d;
 };
 
-int numSect=4;
+int numSect=1;
 
 sectors S[30];
 
 int loadSectors[]=
 {//wall start, wall end, z1 height, z2 height, bottom color, top color
- 0,  4, 0, 40, 0, 255, 0, 0, 160, 0,
+ /*0,  4, 0, 40, 0, 255, 0, 0, 160, 0,
  4,  8, 0, 40, 0, 255, 255, 0, 160, 160,
  8, 12, 0, 40, 160, 100, 0, 110, 50, 0,
- 12,16, 0, 40, 0, 60, 130, 255, 255, 0
+ 12,16, 0, 40, 0, 60, 130, 255, 255, 0*/
+ 0, 4, -5, 1000, 0, 255, 255, 0 ,160, 160
+ //4, 8, 0, 5, 0, 255, 255, 0, 160, 160,
+ //8, 12, 900, 1000, 0, 255, 255, 0, 160, 160
 };
 
 int loadWalls[]=
 {//x1,y1, x2,y2, color
-  0, 0, 32, 0, 255, 255, 0, 
+ /* 0, 0, 32, 0, 255, 255, 0, 
  32, 0, 32,32, 160, 160, 0,
  32,32,  0,32, 255, 255, 0,
   0,32,  0, 0, 160, 160, 0,
@@ -58,7 +61,23 @@ int loadWalls[]=
   0, 64, 32, 64, 160, 100, 0,
  32, 64, 32, 96, 110, 50, 0,
  32, 96,  0, 96, 160, 100, 0,
-  0, 96,  0, 64, 110, 50, 0
+  0, 96,  0, 64, 110, 50, 0*/
+
+-3200, -3200, 3200, -3200, 0, 255, 0,
+3200, -3200, 3200, 3200, 0, 160, 0,
+3200, 3200, -3200, 3200, 0, 255, 0,
+-3200, 3200, -3200, -3200, 0, 160, 0
+
+/*-3200, -3200, 3200, -3200, 0, 255, 0,
+3200, -3200, 3200, 3200, 0, 160, 0,
+3200, 3200, -3200, 3200, 0, 255, 0,
+-3200, 3200, -3200, -3200, 0, 160, 0,
+
+-3200, -3200, 3200, -3200, 0, 255, 0,
+3200, -3200, 3200, 3200, 0, 160, 0,
+3200, 3200, -3200, 3200, 0, 255, 0,
+-3200, 3200, -3200, -3200, 0, 160, 0*/
+
 };
 
 void initwalls(){
@@ -91,7 +110,7 @@ void initwalls(){
   }
 
 void iDrawLine(int sx0, int sx1, int sz0, int sz1);
-void iDrawWall(int sx0, int sx1, int sz0, int sz1, int sz2, int sz3, int red, int green, int blue, int s);
+void iDrawWall(int sx0, int sx1, int sz0, int sz1, int sz2, int sz3, int red, int green, int blue, int s, int i);
 void clipBehindPlayer(int *x1,int *y1,int *z1, int x2,int y2,int z2);
 int dist(int x1,int y1, int x2,int y2);
 
@@ -99,7 +118,7 @@ int dist(int x1,int y1, int x2,int y2);
 void iDraw() {
     iClear();
     
-    int ax[2] = {40, 40}, ay[2] = {10, 290}, az[2] = {0, 0};
+    int ax[2] = {40, 40}, ay[2] = {10, 290}, az[2] = {0, 0}, loop;
     int x1[2], y1_new[2], z1[2];
     int px[4], py[4], pz[4];
 
@@ -115,11 +134,11 @@ void iDraw() {
         
         S[s].d=0;
 
-        if(mz<S[s].wz1){S[s].toporbottom=1;}
-        else if(mz>S[s].wz2){S[s].toporbottom=2;}
-        else {S[s].toporbottom=0;}
+        if(mz<S[s].wz1){S[s].toporbottom=1; loop=2; for(int i=0; i<1920; i++){S[s].points[i]=1040;}}
+        else if(mz>S[s].wz2){S[s].toporbottom=2; loop=2; for(int i=0; i<1920; i++){S[s].points[i]= 0;}}
+        else {S[s].toporbottom=0; loop=1;}
 
-        for(int i=0; i<2; i++){
+        for(int i=0; i<loop; i++){
 
             for(int w=S[s].ws; w<S[s].we; w++){
 
@@ -130,7 +149,7 @@ void iDraw() {
                 z1[0] = S[s].wz1 - mz;
                 z1[1] = S[s].wz1 - mz;
 
-                if(i==0) {int temp=x1[0]; x1[0]=x1[1]; x1[1]=temp; temp=y1_new[0]; y1_new[0]=y1_new[1]; y1_new[1]=temp;} 
+                if(i==1) {int temp=x1[0]; x1[0]=x1[1]; x1[1]=temp; temp=y1_new[0]; y1_new[0]=y1_new[1]; y1_new[1]=temp;} 
 
                 px[0] = (x1[0] * cos(t) - y1_new[0] * sin(t));
                 px[1] = (x1[1] * cos(t) - y1_new[1] * sin(t));
@@ -146,8 +165,8 @@ void iDraw() {
 
                 pz[0] = z1[0] + (g * py[0] / 32.0);
                 pz[1] = z1[1] + (g * py[1] / 32.0);
-                pz[2] = pz[0] + S[s].wz2;
-                pz[3] = pz[1] + S[s].wz2;
+                pz[2] = S[s].wz2 + (g * py[0] / 32.0);
+                pz[3] = S[s].wz2 + (g * py[1] / 32.0);
                 
                 if(py[0]<1 && py[1]<1){continue;}
                 if(py[0]<1){
@@ -177,10 +196,10 @@ void iDraw() {
 
                 /*iDrawLine(sx[0],sx[1],sz[0],sz[1]);
                 iDrawLine(sx[0],sx[1],sz[2],sz[3]);*/           //made redundant by the iDrawWall 
-                iDrawWall(sx[0],sx[1],sz[0],sz[1],sz[2],sz[3],W[w].red,W[w].green,W[w].blue,s);
+                iDrawWall(sx[0],sx[1],sz[0],sz[1],sz[2],sz[3],W[w].red,W[w].green,W[w].blue,s,i);
             }
             S[s].d/=(S[s].we-S[s].ws);  
-            S[s].toporbottom*=-1;  
+            
         }
     }
 }
@@ -195,7 +214,7 @@ void iDrawLine(int sx0, int sx1, int sz0, int sz1) {
 
 }
 
-void iDrawWall(int sx0, int sx1, int sz0, int sz1, int sz2, int sz3, int red, int green, int blue, int s) {
+void iDrawWall(int sx0, int sx1, int sz0, int sz1, int sz2, int sz3, int red, int green, int blue, int s, int i) {
 
     int screenx,screenz;
 
@@ -219,12 +238,24 @@ void iDrawWall(int sx0, int sx1, int sz0, int sz1, int sz2, int sz3, int red, in
         if(screenz1>1040){screenz1=1040;}
         if(screenz2>1040){screenz2=1040;}
 
-        if(S[s].toporbottom==1){ S[s].points[screenx]=screenz1; continue;}
+        /*if(S[s].toporbottom==1){ S[s].points[screenx]=screenz1; continue;}
         if(S[s].toporbottom==2){S[s].points[screenx]=screenz2; continue;}
         if(S[s].toporbottom==-1){ for(int screenz=S[s].points[screenx]; screenz<screenz1; screenz++){iSetColor(S[s].bottomred,S[s].bottomgreen,S[s].bottomblue); iPoint(screenx,screenz);}}
-        if(S[s].toporbottom==-2){ for(int screenz=screenz2; screenz<S[s].points[screenx]; screenz++){iSetColor(S[s].topred,S[s].topgreen,S[s].topblue); iPoint(screenx,screenz);}}
-        for(int screenz=screenz1; screenz<screenz2; screenz++){ iSetColor(red,green,blue); iPoint(screenx,screenz);}
-          
+        if(S[s].toporbottom==-2){ for(int screenz=screenz2; screenz<S[s].points[screenx]; screenz++){iSetColor(S[s].topred,S[s].topgreen,S[s].topblue); iPoint(screenx,screenz);}}*/
+        
+        if(i==0)
+        {
+            if(S[s].toporbottom==1){ S[s].points[screenx] = screenz1;}
+            if(S[s].toporbottom==2){ S[s].points[screenx] = screenz2;}
+            for(int screenz=screenz1; screenz<screenz2; screenz++){ iSetColor(red,green,blue); iPoint(screenx,screenz);}
+        } 
+
+        if(i==1)
+        {
+            if(S[s].toporbottom==1){ screenz2 = S[s].points[screenx];}
+            if(S[s].toporbottom==2){ screenz1 = S[s].points[screenx];}
+            for(int screenz=screenz1; screenz<screenz2; screenz++){ iSetColor(red,green,blue); iPoint(screenx,screenz);}
+        } 
 
     }
     
