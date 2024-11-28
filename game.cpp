@@ -10,7 +10,7 @@ char* gun_image;
 
 int sx[2], sz[4];
 int mx, my , mz ;
-float t, g ;
+float t, g=1 ;
 
 struct walls{
     int wx0, wy0;
@@ -203,8 +203,9 @@ void iDraw() {
             
         }
     }
-    iShowBMP2(800,20,gun_image,0);
-    iShowBMP2(850,520,"shotgun\\crosshair.bmp",0);
+    iShowBMP2(800,80,gun_image,0);
+    iShowBMP2(900,550,"shotgun\\crosshair.bmp",0);
+    iShowBMP2(0,0,"shotgun\\status_bar.bmp",-1);
 }
 
 void iDrawLine(int sx0, int sx1, int sz0, int sz1) {
@@ -366,7 +367,7 @@ int main() {
     iSetTimer(100, update_gun);
     iSetTimer(3000, check);
     mx=70,my=-110,mz=20;
-    float t=0,g=0;
+    //float t=0,g=0;
 
     iInitialize(1920,1040, "demo");
     return 0;
