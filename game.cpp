@@ -35,15 +35,12 @@ int loadSectors[]=
  0,  4, 0, 40, 0, 255, 0, 0, 160, 0,
  4,  8, 0, 40, 0, 255, 255, 0, 160, 160,
  8, 12, 0, 40, 160, 100, 0, 110, 50, 0,
- 12,16, 0, 40, 0, 60, 130, 255, 255, 0
- //0, 4, -5, 1000, 0, 255, 255, 0 ,160, 160
- //4, 8, 0, 5, 0, 255, 255, 0, 160, 160,
- //8, 12, 900, 1000, 0, 255, 255, 0, 160, 160
+ 12,16, 0, 40, 0, 60, 130, 255, 255, 0,
 };
 
 int loadWalls[]=
 {//x1,y1, x2,y2, color
-  0, 0, 32, 0, 255, 255, 0, 
+  0, 0, 32, 0, 255, 255, 0,  
  32, 0, 32,32, 160, 160, 0,
  32,32,  0,32, 255, 255, 0,
   0,32,  0, 0, 160, 160, 0,
@@ -62,21 +59,6 @@ int loadWalls[]=
  32, 64, 32, 96, 110, 50, 0,
  32, 96,  0, 96, 160, 100, 0,
   0, 96,  0, 64, 110, 50, 0
-
-/*-3200, -3200, 3200, -3200, 0, 255, 0,
-3200, -3200, 3200, 3200, 0, 160, 0,
-3200, 3200, -3200, 3200, 0, 255, 0,
--3200, 3200, -3200, -3200, 0, 160, 0
-
--3200, -3200, 3200, -3200, 0, 255, 0,
-3200, -3200, 3200, 3200, 0, 160, 0,
-3200, 3200, -3200, 3200, 0, 255, 0,
--3200, 3200, -3200, -3200, 0, 160, 0,
-
--3200, -3200, 3200, -3200, 0, 255, 0,
-3200, -3200, 3200, 3200, 0, 160, 0,
-3200, 3200, -3200, 3200, 0, 255, 0,
--3200, 3200, -3200, -3200, 0, 160, 0*/
 
 };
 
@@ -252,10 +234,10 @@ void iDrawWall(int sx0, int sx1, int sz0, int sz1, int sz2, int sz3, int red, in
 
         if(i==1)
         {
-            if(S[s].toporbottom==1){ screenz2 = S[s].points[screenx];}
-            if(S[s].toporbottom==2){ screenz1 = S[s].points[screenx];}
-            for(int screenz=screenz1; screenz<screenz2; screenz++){ iSetColor(red,green,blue); iPoint(screenx,screenz);}
-        } 
+            if(S[s].toporbottom==1){ screenz2 = S[s].points[screenx]; iSetColor(S[s].bottomred,S[s].bottomgreen,S[s].bottomblue);}
+            if(S[s].toporbottom==2){ screenz1 = S[s].points[screenx]; iSetColor(S[s].topred,S[s].topgreen,S[s].topblue);}
+            for(int screenz=screenz1; screenz<screenz2; screenz++){iPoint(screenx,screenz);}
+        }
 
     }
     
