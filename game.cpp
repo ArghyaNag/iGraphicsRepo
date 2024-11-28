@@ -204,6 +204,7 @@ void iDraw() {
         }
     }
     iShowBMP2(800,20,gun_image,0);
+    iShowBMP2(850,520,"shotgun\\crosshair.bmp",0);
 }
 
 void iDrawLine(int sx0, int sx1, int sz0, int sz1) {
