@@ -1,6 +1,13 @@
 #include "iGraphics.h"
 #include<algorithm>
 
+enum {IDLE,FIRE};
+int fire_idx=0;
+int state=IDLE;
+char gun_fire[15][100];
+char gun_idle[100];
+char* gun_image;
+
 int sx[2], sz[4];
 int mx, my , mz ;
 float t, g ;
@@ -196,6 +203,7 @@ void iDraw() {
             
         }
     }
+    iShowBMP2(800,20,gun_image,0);
 }
 
 void iDrawLine(int sx0, int sx1, int sz0, int sz1) {
@@ -255,6 +263,29 @@ void iDrawWall(int sx0, int sx1, int sz0, int sz1, int sz2, int sz3, int red, in
     
 }
 
+void populate_gun_images(){
+    sprintf(gun_idle, "shotgun\\file_0-triangle.bmp");
+    for(int i=0; i<15; i++){
+        sprintf(gun_fire[i], "shotgun\\file_%d-triangle.bmp",i);
+    }
+    gun_image = gun_idle;
+}
+
+void update_gun(){
+    switch(state){
+        case IDLE:
+            gun_image = gun_idle;
+            break;
+        case FIRE:
+            gun_image = gun_fire[fire_idx];
+            fire_idx = (fire_idx + 1) % 15;
+            if(fire_idx == 0){
+                state = IDLE;
+            }
+            break;
+    }
+}
+
 void iKeyboard(unsigned char key) {
 	if (key == 'j') {t-=0.07; if(t<0){t+=6.30;}}
     if( key == 'l') {t+=0.07; if(t>6.30){t-=6.30;}}
@@ -271,6 +302,8 @@ void iKeyboard(unsigned char key) {
 
     if(key == 't') {mz+=4;}
     if(key == 'g') {mz-=4;}
+
+    if(key == 'f') {state=FIRE;}
 
 	}
 
@@ -328,7 +361,8 @@ void check(){
 int main() {
 
     initwalls();
-    iSetTimer(5, pixelhishab);
+    populate_gun_images();
+    iSetTimer(100, update_gun);
     iSetTimer(3000, check);
     mx=70,my=-110,mz=20;
     float t=0,g=0;
