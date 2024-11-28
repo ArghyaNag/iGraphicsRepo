@@ -8,6 +8,9 @@ char gun_fire[15][100];
 char gun_idle[100];
 char* gun_image;
 
+int bx=0,by=80;
+float theta;
+
 int sx[2], sz[4];
 int mx, my , mz ;
 float t, g=1 ;
@@ -64,10 +67,14 @@ int loadWalls[]=
  96, 96, 64, 96, 0, 255, 255,
  64, 96, 64, 64, 0, 160, 160,
 
-  0, 64, 32, 64, 160, 100, 0,
+  /*0, 64, 32, 64, 160, 100, 0,
  32, 64, 32, 96, 110, 50, 0,
- 32, 96,  0, 96, 160, 100, 0,
-  0, 96,  0, 64, 110, 50, 0,
+ 32, 96,  0, 96, 160, 100, 0,*/
+  (bx-32*cos(theta)), (by + 32*sin(theta)), (bx + 32*cos(theta)), (by - 32*sin(theta)), 110, 50, 0,
+  (bx-32*cos(theta)), (by + 32*sin(theta)), (bx + 32*cos(theta)), (by - 32*sin(theta)), 110, 50, 0,
+  (bx-32*cos(theta)), (by + 32*sin(theta)), (bx + 32*cos(theta)), (by - 32*sin(theta)), 110, 50, 0,
+  (bx-32*cos(theta)), (by + 32*sin(theta)), (bx + 32*cos(theta)), (by - 32*sin(theta)), 110, 50, 0,
+
 
   -320, -320, 320, -320, 255, 255, 0,  
  320, -320, 320,320, 160, 160, 0,
@@ -108,7 +115,7 @@ void initwalls(){
    v2+=7;
   }
  }
-  }
+}
 
 void iDrawLine(int sx0, int sx1, int sz0, int sz1);
 void iDrawWall(int sx0, int sx1, int sz0, int sz1, int sz2, int sz3, int red, int green, int blue, int s, int i);
@@ -264,7 +271,7 @@ void iDrawWall(int sx0, int sx1, int sz0, int sz1, int sz2, int sz3, int red, in
     }
     
 }
-
+ 
 void populate_gun_images(){
     sprintf(gun_idle, "shotgun\\file_0-triangle.bmp");
     for(int i=0; i<15; i++){
@@ -311,7 +318,7 @@ void iKeyboard(unsigned char key) {
 
 	
 void pixelhishab() {
-
+    theta = atan((bx-mx)/(1.0*(by-my)));  
 }
 
 int dist(int x1,int y1, int x2,int y2)
@@ -366,6 +373,8 @@ int main() {
     populate_gun_images();
     iSetTimer(100, update_gun);
     iSetTimer(3000, check);
+    //iSetTimer(1,initwalls);
+    iSetTimer(100,pixelhishab);
     mx=70,my=-110,mz=20;
     //float t=0,g=0;
 
