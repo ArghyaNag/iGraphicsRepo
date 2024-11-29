@@ -1,6 +1,33 @@
 #include "iGraphics.h"
 #include<algorithm>
 
+//textures
+#include "textures/T_NUMBERS.h"
+#include "textures/T_VIEW2D.h"
+#include "textures/T_00.h"
+#include "textures/T_01.h"
+#include "textures/T_02.h"
+#include "textures/T_03.h"
+#include "textures/T_04.h"
+#include "textures/T_05.h"
+#include "textures/T_06.h"
+#include "textures/T_07.h"
+#include "textures/T_08.h"
+#include "textures/T_09.h"
+#include "textures/T_10.h"
+#include "textures/T_11.h"
+#include "textures/T_12.h"
+#include "textures/T_13.h"
+#include "textures/T_14.h"
+#include "textures/T_15.h"
+#include "textures/T_16.h"
+#include "textures/T_17.h"
+#include "textures/T_18.h"
+#include "textures/T_19.h"
+int numText=19;                          //number of textures
+int numSect= 0;                          //number of sectors
+int numWall= 0;                          //number of walls
+
 enum {IDLE,FIRE};
 int fire_idx=0;
 int state=IDLE;
@@ -16,11 +43,11 @@ struct walls{
     int wx0, wy0;
     int wx1, wy1;
     int red,green,blue;
+    int wt,u,v;
+    int shade;
 };
 
-int numWall=24;
-
-walls W[30];
+walls W[256];
 
 struct sectors{
     int ws,we;
@@ -31,84 +58,48 @@ struct sectors{
     int points[1920];
     int cx,cy;
     int d;
+    int st,ss;
 };
 
-int numSect=6;
+sectors S[128];
 
-sectors S[30];
+typedef struct 
+{
+ int w,h;                             
+ const unsigned char *name;           
+}TexureMaps; TexureMaps Textures[64]; 
 
-int loadSectors[]=
-{//wall start, wall end, z1 height, z2 height, bottom color, top color
- 0,  4,-10, 40, 0, 255, 0, 0, 160, 0,
- 4,  8,-10, 40, 0, 255, 255, 0, 160, 160,
- 8, 12,-10, 40, 160, 100, 0, 110, 50, 0,
- 12,16,-10, 40, 0, 60, 130, 255, 255, 0,
- 16,20,-10,-5, 100, 100, 100, 200, 200, 200,
- 20,24,50,55, 100, 100, 100, 200, 200, 200,
-};
+void load()
+{
+ FILE *fp = fopen("level.h","r");
+ if(fp == NULL){ printf("Error opening level.h"); return;}
+ int s,w;
 
-int loadWalls[]=
-{//x1,y1, x2,y2, color
-  0, 0, 32, 0, 255, 255, 0,  
- 32, 0, 32,32, 160, 160, 0,
- 32,32,  0,32, 255, 255, 0,
-  0,32,  0, 0, 160, 160, 0,
-
- 64, 0, 96, 0, 0, 255, 0,
- 96, 0, 96,32, 0, 160, 0,
- 96,32, 64,32, 0, 255, 0,
- 64,32, 64, 0, 0, 160, 0,
-
- 64, 64, 96, 64, 0, 255, 255,
- 96, 64, 96, 96, 0, 160, 160,
- 96, 96, 64, 96, 0, 255, 255,
- 64, 96, 64, 64, 0, 160, 160,
-
-  0, 64, 32, 64, 160, 100, 0,
- 32, 64, 32, 96, 110, 50, 0,
- 32, 96,  0, 96, 160, 100, 0,
-  0, 96,  0, 64, 110, 50, 0,
-
-  -320, -320, 320, -320, 255, 255, 0,  
- 320, -320, 320,320, 160, 160, 0,
- 320,320, -320,320, 255, 255, 0,
-  -320,320, -320, -320, 160, 160, 0,
-
-  -320, -320, 320, -320, 255, 255, 0,  
- 320, -320, 320,320, 160, 160, 0,
- 320,320, -320,320, 255, 255, 0,
-  -320,320, -320, -320, 160, 160, 0,
-
-};
-
-void initwalls(){
- int v1=0,v2=0;
- for(int s=0;s<numSect;s++)
+ fscanf(fp,"%i",&numSect);   //number of sectors 
+ for(s=0;s<numSect;s++)      //load all sectors
  {
-  S[s].ws=loadSectors[v1+0];                   
-  S[s].we=loadSectors[v1+1];                   
-  S[s].wz1=loadSectors[v1+2];                  
-  S[s].wz2=loadSectors[v1+3]-loadSectors[v1+2];
-  S[s].bottomred=loadSectors[v1+4]; 
-  S[s].bottomgreen=loadSectors[v1+5];
-  S[s].bottomblue=loadSectors[v1+6];
-  S[s].topred=loadSectors[v1+7];
-  S[s].topgreen=loadSectors[v1+8];
-  S[s].topblue=loadSectors[v1+9];                  
-  v1+=10;
-  for(int w=S[s].ws;w<S[s].we;w++)
-  {
-   W[w].wx0=loadWalls[v2+0]; 
-   W[w].wy0=loadWalls[v2+1]; 
-   W[w].wx1=loadWalls[v2+2]; 
-   W[w].wy1=loadWalls[v2+3];
-   W[w].red =loadWalls[v2+4];
-   W[w].green =loadWalls[v2+5];
-   W[w].blue =loadWalls[v2+6]; 
-   v2+=7;
-  }
+  fscanf(fp,"%i",&S[s].ws);  
+  fscanf(fp,"%i",&S[s].we); 
+  fscanf(fp,"%i",&S[s].wz1);  
+  fscanf(fp,"%i",&S[s].wz2); 
+  fscanf(fp,"%i",&S[s].st); 
+  fscanf(fp,"%i",&S[s].ss);  
  }
-  }
+ fscanf(fp,"%i",&numWall);   //number of walls 
+ for(s=0;s<numWall;s++)      //load all walls
+ {
+  fscanf(fp,"%i",&W[s].wx0);  
+  fscanf(fp,"%i",&W[s].wy0); 
+  fscanf(fp,"%i",&W[s].wx1);  
+  fscanf(fp,"%i",&W[s].wy1); 
+  fscanf(fp,"%i",&W[s].wt);
+  fscanf(fp,"%i",&W[s].u); 
+  fscanf(fp,"%i",&W[s].v);  
+  fscanf(fp,"%i",&W[s].shade);  
+ }
+ fscanf(fp,"%i %i %i %i %i",&mx,&my,&mz, &t,&g); //player position, angle, look direction 
+ fclose(fp); 
+}
 
 void iDrawLine(int sx0, int sx1, int sz0, int sz1);
 void iDrawWall(int sx0, int sx1, int sz0, int sz1, int sz2, int sz3, int red, int green, int blue, int s, int i);
@@ -251,13 +242,13 @@ void iDrawWall(int sx0, int sx1, int sz0, int sz1, int sz2, int sz3, int red, in
         {
             if(S[s].toporbottom==1){ S[s].points[screenx] = screenz1;}
             if(S[s].toporbottom==2){ S[s].points[screenx] = screenz2;}
-            for(int screenz=screenz1; screenz<screenz2; screenz++){ iSetColor(red,green,blue); iPoint(screenx,screenz);}
+            for(int screenz=screenz1; screenz<screenz2; screenz++){ iSetColor(0,155,200); iPoint(screenx,screenz);}
         } 
 
         if(i==1)
         {
-            if(S[s].toporbottom==1){ screenz2 = S[s].points[screenx]; iSetColor(S[s].bottomred,S[s].bottomgreen,S[s].bottomblue);}
-            if(S[s].toporbottom==2){ screenz1 = S[s].points[screenx]; iSetColor(S[s].topred,S[s].topgreen,S[s].topblue);}
+            if(S[s].toporbottom==1){ screenz2 = S[s].points[screenx]; iSetColor(100,78,90);}
+            if(S[s].toporbottom==2){ screenz1 = S[s].points[screenx]; iSetColor(100,78,90);}
             for(int screenz=screenz1; screenz<screenz2; screenz++){iPoint(screenx,screenz);}
         }
 
@@ -306,6 +297,8 @@ void iKeyboard(unsigned char key) {
     if(key == 'g') {mz-=4;}
 
     if(key == 'f') {state=FIRE;}
+
+    if(key == 'b') {load();}
 
 	}
 
@@ -362,7 +355,7 @@ void check(){
 
 int main() {
 
-    initwalls();
+    //initwalls();
     populate_gun_images();
     iSetTimer(100, update_gun);
     iSetTimer(3000, check);

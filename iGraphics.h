@@ -546,3 +546,4 @@ void iInitialize(int width=500, int height=500, char *title="iGraphics")
 
     glutMainLoop();
 }
+
