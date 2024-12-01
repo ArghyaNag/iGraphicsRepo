@@ -27,8 +27,9 @@ int debug=0;
 #include "textures/T_19.h"
 int numText=19;                          
 int numSect= 0;                          
-int numWall= 0;                          
+int numWall= 0;         
 
+int access[1000][1000]; 
 enum {IDLE,FIRE};
 int fire_idx=0;
 int state=IDLE;
@@ -73,7 +74,7 @@ typedef struct
 void load()
 {
  FILE *fp = fopen("level.h","r");
- if(fp == NULL){ printf("Error opening level.h"); return;}
+ if(fp == NULL){return;}
  int s,w;
 
  fscanf(fp,"%i",&numSect);   

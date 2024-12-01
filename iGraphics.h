@@ -22,6 +22,7 @@
 #include "stb_image.h"
 #endif
 
+int frame1,frame2;
 int iScreenHeight, iScreenWidth;
 int iMouseX, iMouseY;
 int ifft=0;
@@ -467,9 +468,15 @@ void iClear()
 }
 
 void displayFF(void){
-
+    if(frame1-frame2>=10){
+    iClear();    
     iDraw();
+
+    frame2=frame1;
     glutSwapBuffers() ;
+    }
+    frame1=glutGet(GLUT_ELAPSED_TIME);
+
 }
 
 void animFF(void)
@@ -526,10 +533,9 @@ void iInitialize(int width=500, int height=500, char *title="iGraphics")
     glOrtho(0.0 , width , 0.0 , height , -1.0 , 1.0) ;
     //glOrtho(-100.0 , 100.0 , -100.0 , 100.0 , -1.0 , 1.0) ;
     //SetTimer(0, 0, 10, timer_proc);
-
-    iClear();
-
+    
     glutDisplayFunc(displayFF) ;
+
     glutKeyboardFunc(keyboardHandler1FF); //normal
     glutSpecialFunc(keyboardHandler2FF); //special keys
     glutMouseFunc(mouseHandlerFF);
