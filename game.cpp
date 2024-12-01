@@ -305,6 +305,20 @@ void inittexture(){
     Textures[17].name=(const unsigned char*)T_17; Textures[17].h=T_17_HEIGHT; Textures[17].w=T_17_WIDTH;
     Textures[18].name=(const unsigned char*)T_18; Textures[18].h=T_18_HEIGHT; Textures[18].w=T_18_WIDTH;
     Textures[19].name=(const unsigned char*)T_19; Textures[19].h=T_19_HEIGHT; Textures[19].w=T_19_WIDTH;
+
+    
+    /*char texture_name[100];
+    char texture_height[100];
+    char texture_width[100];
+    for (int i = 0; i < 20; i++) {
+        sprintf(texture_name, "T_%02d", i);
+        sprintf(texture_height, "T_%02d_HEIGHT", i);
+        sprintf(texture_width, "T_%02d_WIDTH", i);
+        Textures[i].name = (const unsigned char*) texture_name;
+        Textures[i].h = texture_height ;
+        Textures[i].w = texture_width ;
+    }*/
+
 }
 
 void populate_gun_images(){
@@ -401,7 +415,7 @@ void iSpecialKeyboard(unsigned char key) {
 }
 
 void check(){
-    //printf("x %d y %d z %d t %f g %f sx0 %d sz0 %d sx1 %d sz1 %d sz2 %d sz3 %d\n",mx,my,mz,t*57.3,g,sx[0],sz[0],sx[1],sz[1],sz[2],sz[3]);
+    printf("x %d y %d z %d t %f g %f sx0 %d sz0 %d sx1 %d sz1 %d sz2 %d sz3 %d\n",mx,my,mz,t*57.3,g,sx[0],sz[0],sx[1],sz[1],sz[2],sz[3]);
 }
 
 int main() {
@@ -411,7 +425,7 @@ int main() {
     populate_gun_images();
     iSetTimer(100, update_gun);
     iSetTimer(3000, check);
-    mx=70,my=-110,mz=20;
+    mx=0,my=0,mz=0;
     //float t=0,g=0;
 
     iInitialize(1920,1040, "demo");
