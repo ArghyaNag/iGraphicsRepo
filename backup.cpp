@@ -27,10 +27,10 @@ int debug=0;
 #include "textures/T_19.h"
 int numText=19;                          
 int numSect= 0;                          
-int numWall= 0;         
+int numWall= 0;                          
+        
 
 int access[1000][1000]; 
-int backx0,backy0,backx1,backy1,frontx0,fronty0,frontx1,fronty1;
 enum {IDLE,FIRE};
 int fire_idx=0;
 int state=IDLE;
@@ -75,6 +75,7 @@ typedef struct
 void load()
 {
  FILE *fp = fopen("level.h","r");
+ if(fp == NULL){ printf("Error opening level.h"); return;}
  if(fp == NULL){return;}
  int s,w;
 
@@ -99,30 +100,7 @@ void load()
   fscanf(fp,"%i",&W[s].u); 
   fscanf(fp,"%i",&W[s].v);  
   fscanf(fp,"%i",&W[s].shade);  
-
-  if(s%4==0){backx0=W[s].wx0; backy0=W[s].wy0; backx1=W[s].wx1; backy1=W[s].wy1;}  
-  else if(s%2==0){
-
-    frontx0=W[s].wx0; fronty0=W[s].wy0; frontx1=W[s].wx1; fronty1=W[s].wy1;
-
-    if(backy0==backy1){
-        for(int i=std::min(backx0,backx1); i<=std::max(backx0,backx1);i++){
-            for(int j=std::min(backy0,fronty1); j<=std::max(backy0,fronty1); j++){
-                access[i][j]=1;
-            }
-        }
-    }
-    else if(backx0==backx1){
-        for(int i=backy0; i<=backy1;i++){
-            for(int j=frontx1; j<=backx0; j++){
-                access[i][j]=1;
-            }
-        }
-    }
-   }
-    }
-  
-
+ }
  fscanf(fp,"%i %i %i %i %i",&mx,&my,&mz, &t,&g); 
  fclose(fp); 
 }
@@ -146,7 +124,7 @@ void testTextures(){
 
 void iDraw() {
     iClear();
-    
+
     int ax[2] = {40, 40}, ay[2] = {10, 290}, az[2] = {0, 0}, loop;
     int x1[2], y1_new[2], z1[2];
     int px[4], py[4], pz[4];
@@ -158,9 +136,9 @@ void iDraw() {
             }
         }
     }
-    
+
     for(int s=0; s<numSect; s++){
-        
+
         S[s].d=0;
 
         if(mz<S[s].wz1){S[s].toporbottom=1; loop=2; for(int i=0; i<1920; i++){S[s].points[i]=1040;}}
@@ -196,7 +174,7 @@ void iDraw() {
                 pz[1] = z1[1] + (g * py[1] / 32.0);
                 pz[2] = S[s].wz2 - mz + (g * py[0] / 32.0);
                 pz[3] = S[s].wz2 - mz + (g * py[1] / 32.0);
-                
+
                 if(py[0]<1 && py[1]<1){continue;}
                 if(py[0]<1){
 
@@ -228,7 +206,7 @@ void iDraw() {
                 iDrawWall(sx[0],sx[1],sz[0],sz[1],sz[2],sz[3],W[w].red,W[w].green,W[w].blue,s,i,w);
             }
             S[s].d/=(S[s].we-S[s].ws);  
-            
+
         }
     }
     iShowBMP2(800,80,gun_image,0);
@@ -271,7 +249,7 @@ void iDrawWall(int sx0, int sx1, int sz0, int sz1, int sz2, int sz3, int red, in
         int screenz2 = dz*(screenx-sx0backup+0.5)/dx + sz2;
 
         float vt = 0, vt_step=(float)Textures[wt].h*W[w].v/(float)(screenz2-screenz1);
- 
+
         if(screenz1<1){vt-=vt_step*screenz1; screenz1=1;}
         if(screenz2<1){screenz2=1;}
         if(screenz1>1040){screenz1=1040;}
@@ -281,7 +259,7 @@ void iDrawWall(int sx0, int sx1, int sz0, int sz1, int sz2, int sz3, int red, in
         if(S[s].toporbottom==2){S[s].points[screenx]=screenz2; continue;}
         if(S[s].toporbottom==-1){ for(int screenz=S[s].points[screenx]; screenz<screenz1; screenz++){iSetColor(S[s].bottomred,S[s].bottomgreen,S[s].bottomblue); iPoint(screenx,screenz);}}
         if(S[s].toporbottom==-2){ for(int screenz=screenz2; screenz<S[s].points[screenx]; screenz++){iSetColor(S[s].topred,S[s].topgreen,S[s].topblue); iPoint(screenx,screenz);}}*/
-        
+
         if(i==0)
         {
             if(S[s].toporbottom==1){ S[s].points[screenx] = screenz1;}
@@ -306,7 +284,7 @@ void iDrawWall(int sx0, int sx1, int sz0, int sz1, int sz2, int sz3, int red, in
         }
 
     }
-    
+
 }
 
 void inittexture(){
@@ -331,7 +309,7 @@ void inittexture(){
     Textures[18].name=(const unsigned char*)T_18; Textures[18].h=T_18_HEIGHT; Textures[18].w=T_18_WIDTH;
     Textures[19].name=(const unsigned char*)T_19; Textures[19].h=T_19_HEIGHT; Textures[19].w=T_19_WIDTH;
 
-    
+
     /*char texture_name[100];
     char texture_height[100];
     char texture_width[100];
@@ -378,21 +356,21 @@ void iKeyboard(unsigned char key) {
     int dx= sin(t)*10;
     int dy= cos(t)*10;
 
-    if (key == 'a') {if(access[mx-dy][my+dx]==0){mx-=dy; my+=dx;}}
-    if (key == 'd') {if(access[mx+dy][my-dx]==0){mx+=dy; my-=dx;}}
-    if (key == 'w') {if(access[mx+dx][my+dy]==0){mx+=dx; my+=dy;}}
-    if (key == 's') {if(access[mx-dx][my-dy]==0){mx-=dx; my-=dy;}}
+    if (key == 'a') {mx-=dy; my+=dx;}
+    if (key == 'd') {mx+=dy; my-=dx;}
+    if (key == 'w') {mx+=dx; my+=dy;}
+    if (key == 's') {mx-=dx; my-=dy;}
 
     if(key == 't') {mz+=4;}
     if(key == 'g') {mz-=4;}
 
     if(key == 'f') {state=FIRE;}
 
-    if(key == 'b') {for(int i=0; i<1000; i++){for(int j=0; j<1000; j++){access[i][j]=0;}} load(); for(int i=0; i<600; i++){ int sum=0; for(int j=0; j<=600; j++){sum+=access[i][j];}printf("%d\n",sum);} }
+    if(key == 'b') {load();}
 
 	}
 
-	
+
 void pixelhishab() {
 
 }
@@ -423,11 +401,11 @@ void iMouse(int button, int state, int mx, int my) {
 	if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN) {
 		//place your codes here
 		//	printf("x = %d, y= %d\n",mx,my);
-		
+
 	}
 	if (button == GLUT_RIGHT_BUTTON && state == GLUT_DOWN) {
 		//place your codes here
-		
+
 	}
 }
 
