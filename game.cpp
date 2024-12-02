@@ -100,8 +100,8 @@ void load()
   fscanf(fp,"%i",&W[s].v);  
   fscanf(fp,"%i",&W[s].shade);  
 
-  if(s%4==0){backx0=W[s].wx0; backy0=W[s].wy0; backx1=W[s].wx1; backy1=W[s].wy1;}  
-  else if(s%2==0){
+  if(s%4==0 && s>11){backx0=W[s].wx0; backy0=W[s].wy0; backx1=W[s].wx1; backy1=W[s].wy1;}  
+  else if(s%2==0 && s>11){
 
     frontx0=W[s].wx0; fronty0=W[s].wy0; frontx1=W[s].wx1; fronty1=W[s].wy1;
 
