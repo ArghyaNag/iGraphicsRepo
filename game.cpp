@@ -32,11 +32,15 @@ int numWall= 0;
 int access[1000][1000]; 
 int backx0,backy0,backx1,backy1,frontx0,fronty0,frontx1,fronty1;
 enum {IDLE,FIRE};
+int menu=1;
 int fire_idx=0;
+int menu_idx=0;
 int state=IDLE;
 char gun_fire[15][100];
 char gun_idle[100];
 char* gun_image;
+char menupics[2100][100];
+char* menupic = "menu\\00001.bmp";
 
 int sx[2], sz[4];
 int mx, my , mz ;
@@ -115,7 +119,7 @@ void load()
     else if(backx0==backx1){
         for(int i=backy0; i<=backy1;i++){
             for(int j=frontx1; j<=backx0; j++){
-                access[i][j]=1;
+                access[j][i]=1;
             }
         }
     }
@@ -146,13 +150,16 @@ void testTextures(){
 
 void iDraw() {
     iClear();
-    
+
+    if(menu==1){ iShowBMP2(0,0,menupic,-1);}
+
+    if(menu==0){
     int ax[2] = {40, 40}, ay[2] = {10, 290}, az[2] = {0, 0}, loop;
     int x1[2], y1_new[2], z1[2];
     int px[4], py[4], pz[4];
 
     for(int s=0;s<numSect-1;s++){    
-        for(int w=0;w<numSect-s-1;w++){
+        for(int w=1;w<numSect-s-1;w++){
             if(S[w].d<S[w+1].d){ 
                 sectors stemp=S[w]; S[w]=S[w+1]; S[w+1]=stemp; 
             }
@@ -235,7 +242,7 @@ void iDraw() {
     iShowBMP2(900,550,"shotgun\\crosshair.bmp",0);
     iShowBMP2(0,0,"shotgun\\status_bar.bmp",-1);
     testTextures();
-}
+}}
 
 
 
@@ -354,6 +361,13 @@ void populate_gun_images(){
     gun_image = gun_idle;
 }
 
+void populate_menu_images(){
+    for(int i=0; i<2000; i++){
+        sprintf(menupics[i], "menu\\%05d.bmp",i+1);
+    }
+   
+}
+
 void update_gun(){
     switch(state){
         case IDLE:
@@ -369,14 +383,21 @@ void update_gun(){
     }
 }
 
+void update_menu(){
+   
+            menupic = menupics[menu_idx];
+            menu_idx = (menu_idx + 1) % 2000; 
+
+}
+
 void iKeyboard(unsigned char key) {
-	if (key == 'j') {t-=0.07; if(t<0){t+=6.30;}}
-    if( key == 'l') {t+=0.07; if(t>6.30){t-=6.30;}}
+	if (key == 'j') {t-=0.035; if(t<0){t+=6.30;}}
+    if( key == 'l') {t+=0.035; if(t>6.30){t-=6.30;}}
     if (key == 'i') {g-=1;}
     if (key == 'k') {g+=1;}
 
-    int dx= sin(t)*10;
-    int dy= cos(t)*10;
+    int dx= sin(t)*7;
+    int dy= cos(t)*7;
 
     if (key == 'a') {if(access[mx-dy][my+dx]==0){mx-=dy; my+=dx;}}
     if (key == 'd') {if(access[mx+dy][my-dx]==0){mx+=dy; my-=dx;}}
@@ -388,7 +409,8 @@ void iKeyboard(unsigned char key) {
 
     if(key == 'f') {state=FIRE;}
 
-    if(key == 'b') {for(int i=0; i<1000; i++){for(int j=0; j<1000; j++){access[i][j]=0;}} load(); for(int i=0; i<600; i++){ int sum=0; for(int j=0; j<=600; j++){sum+=access[i][j];}printf("%d\n",sum);} }
+    if(key == 'b') {for(int i=0; i<1000; i++){for(int j=0; j<1000; j++){access[i][j]=0;}} load(); /*for(int i=0; i<600; i++){ int sum=0; for(int j=0; j<=600; j++){sum+=access[i][j];}printf("%d\n",sum);}*/ }
+    if(key == 'c') {menu=0;}
 
 	}
 
@@ -448,7 +470,9 @@ int main() {
     //initwalls();
     inittexture();
     populate_gun_images();
+    populate_menu_images();
     iSetTimer(100, update_gun);
+    iSetTimer(57, update_menu);
     iSetTimer(3000, check);
     mx=0,my=0,mz=0;
     //float t=0,g=0;
