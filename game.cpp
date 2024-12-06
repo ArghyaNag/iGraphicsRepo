@@ -25,7 +25,20 @@ int debug=0;
 #include "textures/T_17.h"
 #include "textures/T_18.h"
 #include "textures/T_19.h"
-int numText=19;                          
+#include "textures/T_20.h"
+#include "textures/T_21.h"
+#include "textures/T_22.h"
+#include "textures/T_23.h"
+#include "textures/T_24.h"
+#include "textures/T_25.h"
+#include "textures/T_26.h"
+#include "textures/T_27.h"
+#include "textures/T_28.h"
+#include "textures/T_29.h"
+#include "textures/T_30.h"
+
+
+int numText=20;                          
 int numSect= 0;                          
 int numWall= 0;         
 
@@ -41,6 +54,7 @@ char gun_idle[100];
 char* gun_image;
 char menupics[2100][100];
 char* menupic = "menu\\00001.bmp";
+int soldind=0;
 
 int sx[2], sz[4];
 int mx, my , mz ;
@@ -136,7 +150,7 @@ void iDrawWall(int sx0, int sx1, int sz0, int sz1, int sz2, int sz3, int red, in
 void clipBehindPlayer(int *x1,int *y1,int *z1, int x2,int y2,int z2);
 int dist(int x1,int y1, int x2,int y2);
 
-void testTextures(){
+/*void testTextures(){
     int x,y,t;
     t=0;
     for(y=0;y<Textures[t].h;y++){
@@ -146,7 +160,7 @@ void testTextures(){
             iPoint(x,y+200);
         }
     }
-}
+}*/
 
 void iDraw() {
     iClear();
@@ -241,12 +255,12 @@ void iDraw() {
     iShowBMP2(800,80,gun_image,0);
     iShowBMP2(900,550,"shotgun\\crosshair.bmp",0);
     iShowBMP2(0,0,"shotgun\\status_bar.bmp",-1);
-    testTextures();
+    //testTextures();
 }}
 
 
 
-void iDrawLine(int sx0, int sx1, int sz0, int sz1) {
+void iDrawLine(int sx0, int sx1, int sz0, int sz1) { 
 
     for(int screenx=sx0; screenx<=sx1; screenx++)
     {
@@ -259,7 +273,7 @@ void iDrawLine(int sx0, int sx1, int sz0, int sz1) {
 void iDrawWall(int sx0, int sx1, int sz0, int sz1, int sz2, int sz3, int red, int green, int blue, int s, int i, int w) {
 
     int screenx,screenz;
-    int wt = W[w].wt;
+    int wt = W[w].wt; if(wt==0){wt=20+soldind;}
     float ht = 0, ht_step=(float)Textures[wt].w*W[w].u/(float)(sx1-sx0);
 
     int dy = sz1 - sz0;
@@ -298,8 +312,9 @@ void iDrawWall(int sx0, int sx1, int sz0, int sz1, int sz2, int sz3, int red, in
                 int red=Textures[wt].name[flag]-W[w].shade/2 ; if(red<0){red=0;} 
                 int green=Textures[wt].name[flag+1]-W[w].shade/2 ; //if(green<0){green=0;}
                 int blue=Textures[wt].name[flag+2]-W[w].shade/2 ; //if(blue<0){blue=0;}
-                iSetColor(red,green,blue);  debug++; if(debug%100000000==0){printf("%d %d %d %d\n",red,green,blue,flag);}
-                iPoint(screenx,screenz);
+                if(W[w].wt==0 && 95<red && red<126 && 110<green && green<149 && 120<blue && blue<160){}
+                else{iSetColor(red,green,blue);  //debug++; if(debug%100000000==0){printf("%d %d %d %d\n",red,green,blue,flag);}
+                iPoint(screenx,screenz);}
                 vt+=vt_step;
             }
             ht+=ht_step;
@@ -337,7 +352,17 @@ void inittexture(){
     Textures[17].name=(const unsigned char*)T_17; Textures[17].h=T_17_HEIGHT; Textures[17].w=T_17_WIDTH;
     Textures[18].name=(const unsigned char*)T_18; Textures[18].h=T_18_HEIGHT; Textures[18].w=T_18_WIDTH;
     Textures[19].name=(const unsigned char*)T_19; Textures[19].h=T_19_HEIGHT; Textures[19].w=T_19_WIDTH;
-
+    Textures[20].name=(const unsigned char*)T_20; Textures[20].h=T_20_HEIGHT; Textures[20].w=T_20_WIDTH;
+    Textures[21].name=(const unsigned char*)T_21; Textures[21].h=T_21_HEIGHT; Textures[21].w=T_21_WIDTH;
+    Textures[22].name=(const unsigned char*)T_22; Textures[22].h=T_22_HEIGHT; Textures[22].w=T_22_WIDTH;
+    Textures[23].name=(const unsigned char*)T_23; Textures[23].h=T_23_HEIGHT; Textures[23].w=T_23_WIDTH;
+    Textures[24].name=(const unsigned char*)T_24; Textures[24].h=T_24_HEIGHT; Textures[24].w=T_24_WIDTH;
+    Textures[25].name=(const unsigned char*)T_25; Textures[25].h=T_25_HEIGHT; Textures[25].w=T_25_WIDTH;
+    Textures[26].name=(const unsigned char*)T_26; Textures[26].h=T_26_HEIGHT; Textures[26].w=T_26_WIDTH;
+    Textures[27].name=(const unsigned char*)T_27; Textures[27].h=T_27_HEIGHT; Textures[27].w=T_27_WIDTH;
+    Textures[28].name=(const unsigned char*)T_28; Textures[28].h=T_28_HEIGHT; Textures[28].w=T_28_WIDTH;
+    Textures[29].name=(const unsigned char*)T_29; Textures[29].h=T_29_HEIGHT; Textures[29].w=T_29_WIDTH;
+    Textures[30].name=(const unsigned char*)T_30; Textures[30].h=T_30_HEIGHT; Textures[30].w=T_30_WIDTH;
     
     /*char texture_name[100];
     char texture_height[100];
@@ -388,6 +413,10 @@ void update_menu(){
             menupic = menupics[menu_idx];
             menu_idx = (menu_idx + 1) % 2000; 
 
+}
+
+void update_soldier(){
+    soldind = (soldind+1)%10;
 }
 
 void iKeyboard(unsigned char key) {
@@ -473,6 +502,7 @@ int main() {
     populate_menu_images();
     iSetTimer(100, update_gun);
     iSetTimer(57, update_menu);
+    iSetTimer(100,update_soldier);
     iSetTimer(3000, check);
     mx=0,my=0,mz=0;
     //float t=0,g=0;

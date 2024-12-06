@@ -38,7 +38,19 @@
 #include "textures/T_17.h"
 #include "textures/T_18.h"
 #include "textures/T_19.h"
-int numText=19;                          //number of textures
+#include "textures/T_20.h"
+#include "textures/T_21.h"
+#include "textures/T_22.h"
+#include "textures/T_23.h"
+#include "textures/T_24.h"
+#include "textures/T_25.h"
+#include "textures/T_26.h"
+#include "textures/T_27.h"
+#include "textures/T_28.h"
+#include "textures/T_29.h"
+#include "textures/T_30.h"
+
+int numText=30;                          //number of textures
 int numSect= 0;                          //number of sectors
 int numWall= 0;                          //number of walls
 
@@ -644,6 +656,7 @@ void init()
  Textures[17].name=T_17; Textures[17].h=T_17_HEIGHT; Textures[17].w=T_17_WIDTH;
  Textures[18].name=T_18; Textures[18].h=T_18_HEIGHT; Textures[18].w=T_18_WIDTH;
  Textures[19].name=T_19; Textures[19].h=T_19_HEIGHT; Textures[19].w=T_19_WIDTH;
+ Textures[20].name=T_20; Textures[20].h=T_20_HEIGHT; Textures[20].w=T_20_WIDTH;
  
  //for alpha overlay darken buttons 
  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
