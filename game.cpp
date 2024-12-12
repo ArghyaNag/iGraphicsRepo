@@ -36,7 +36,7 @@ int debug=0;
 #include "textures/T_28.h"
 #include "textures/T_29.h"
 #include "textures/T_30.h"
-
+#include "textures/T_31.h"
 
 int numText=20;                          
 int numSect= 0;                          
@@ -45,16 +45,18 @@ int numWall= 0;
 int access[1000][1000]; 
 int backx0,backy0,backx1,backy1,frontx0,fronty0,frontx1,fronty1;
 enum {IDLE,FIRE};
+enum {jIDLE,jFIRE,jDEATH};
 int menu=1;
 int fire_idx=0;
 int menu_idx=0;
 int state=IDLE;
+int jstate=jIDLE;
 char gun_fire[15][100];
 char gun_idle[100];
 char* gun_image;
 char menupics[2100][100];
 char* menupic = "menu\\00001.bmp";
-int soldind=0;
+int jagind=23;
 
 int sx[2], sz[4];
 int mx, my , mz ;
@@ -273,7 +275,7 @@ void iDrawLine(int sx0, int sx1, int sz0, int sz1) {
 void iDrawWall(int sx0, int sx1, int sz0, int sz1, int sz2, int sz3, int red, int green, int blue, int s, int i, int w) {
 
     int screenx,screenz;
-    int wt = W[w].wt; if(wt==0){wt=20+soldind;}
+    int wt = W[w].wt; if(wt==0){wt=jagind;}
     float ht = 0, ht_step=(float)Textures[wt].w*W[w].u/(float)(sx1-sx0);
 
     int dy = sz1 - sz0;
@@ -363,6 +365,7 @@ void inittexture(){
     Textures[28].name=(const unsigned char*)T_28; Textures[28].h=T_28_HEIGHT; Textures[28].w=T_28_WIDTH;
     Textures[29].name=(const unsigned char*)T_29; Textures[29].h=T_29_HEIGHT; Textures[29].w=T_29_WIDTH;
     Textures[30].name=(const unsigned char*)T_30; Textures[30].h=T_30_HEIGHT; Textures[30].w=T_30_WIDTH;
+    Textures[31].name=(const unsigned char*)T_31; Textures[31].h=T_31_HEIGHT; Textures[31].w=T_31_WIDTH;
     
     /*char texture_name[100];
     char texture_height[100];
@@ -377,6 +380,8 @@ void inittexture(){
     }*/
 
 }
+
+
 
 void populate_gun_images(){
     sprintf(gun_idle, "shotgun\\file_0-triangle.bmp");
@@ -415,8 +420,10 @@ void update_menu(){
 
 }
 
-void update_soldier(){
-    soldind = (soldind+1)%10;
+void update_jaguar(){
+   if(jstate==jIDLE) {jagind++; if(jagind>27){jagind=23;}}
+   else if(jstate==jFIRE) {jagind++; if(jagind>22){jagind=20;}}
+   else if(jstate==jDEATH) {jagind++; if(jagind>31){jagind=31;}}
 }
 
 void iKeyboard(unsigned char key) {
@@ -440,6 +447,10 @@ void iKeyboard(unsigned char key) {
 
     if(key == 'b') {for(int i=0; i<1000; i++){for(int j=0; j<1000; j++){access[i][j]=0;}} load(); /*for(int i=0; i<600; i++){ int sum=0; for(int j=0; j<=600; j++){sum+=access[i][j];}printf("%d\n",sum);}*/ }
     if(key == 'c') {menu=0;}
+
+    if(key == 'v') {jstate=jIDLE; jagind=23;}
+    if(key == 'n') {jstate=jFIRE; jagind=20;}
+    if(key == 'm') {jstate=jDEATH; jagind=28;}
 
 	}
 
@@ -502,7 +513,7 @@ int main() {
     populate_menu_images();
     iSetTimer(100, update_gun);
     iSetTimer(57, update_menu);
-    iSetTimer(100,update_soldier);
+    iSetTimer(100,update_jaguar);
     iSetTimer(3000, check);
     mx=0,my=0,mz=0;
     //float t=0,g=0;
