@@ -448,7 +448,7 @@ void update_menu(){
 }
 
 void update_jaguar(){
-   if(jstate==jIDLE) {jagind++; if(jagind>27){jagind=23;}}
+   if(jstate==jIDLE) {jagind++; if(jagind>26){jagind=23;}}
    else if(jstate==jFIRE) {jagind++; if(jagind>22){jagind=20;}}
    else if(jstate==jDEATH) {jagind++; if(jagind>31){jagind=31;}}
 }
@@ -470,14 +470,14 @@ void iKeyboard(unsigned char key) {
     if(key == 't') {mz+=4;}
     if(key == 'g') {mz-=4;}
 
-    if(key == 'f') {state=FIRE; int bx = (288-my)*tan(t) + mx; if(bx<316 && bx>300){jstate=jDEATH;}}
+    if(key == 'f') {state=FIRE; int bx = (288-my)*tan(t) + mx; if(bx<316 && bx>300){jstate=jDEATH; jagind=24;}}
 
     if(key == 'b') {for(int i=0; i<1000; i++){for(int j=0; j<1000; j++){access[i][j]=0;}} load(); /*for(int i=0; i<600; i++){ int sum=0; for(int j=0; j<=600; j++){sum+=access[i][j];}printf("%d\n",sum);}*/ }
     if(key == 'c') {menu=0;}
 
     if(key == 'v') {jstate=jIDLE; jagind=23;}
     if(key == 'n') {jstate=jFIRE; jagind=20;}
-    if(key == 'm') {jstate=jDEATH; jagind=28;}
+    if(key == 'm') {jstate=jDEATH; jagind=27;}
 
 	}
 
@@ -540,7 +540,7 @@ int main() {
     populate_menu_images();
     iSetTimer(100, update_gun);
     iSetTimer(57, update_menu);
-    iSetTimer(100,update_jaguar);
+    iSetTimer(150,update_jaguar);
     iSetTimer(3000, check);
     mx=0,my=0,mz=0;
     //float t=0,g=0;
