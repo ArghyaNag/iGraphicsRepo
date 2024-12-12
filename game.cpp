@@ -1,5 +1,6 @@
 #include "iGraphics.h"
 #include<algorithm>
+#include<cmath>
 
 int debug=0;
 
@@ -62,6 +63,13 @@ int sx[2], sz[4];
 int mx, my , mz ;
 float t, g=1 ;
 
+struct enemystats{
+    int isEnemy;
+    int shotcount;
+};
+
+enemystats enemy[100];
+
 struct walls{
     int wx0, wy0;
     int wx1, wy1;
@@ -106,7 +114,7 @@ void load()
   fscanf(fp,"%i",&S[s].wz1);  
   fscanf(fp,"%i",&S[s].wz2); 
   fscanf(fp,"%i",&S[s].st); 
-  fscanf(fp,"%i",&S[s].ss);  
+  fscanf(fp,"%i",&S[s].ss);   
  }
  fscanf(fp,"%i",&numWall);   
  for(s=0;s<numWall;s++)      
@@ -201,8 +209,27 @@ void iDraw() {
                 z1[0] = S[s].wz1 - mz;
                 z1[1] = S[s].wz1 - mz;
 
-                if(i==1) {int temp=x1[0]; x1[0]=x1[1]; x1[1]=temp; temp=y1_new[0]; y1_new[0]=y1_new[1]; y1_new[1]=temp;} 
+                if(S[s].we-S[s].ws==2){
 
+                    /*int centerx = ((x1[0]+x1[1])/2);
+                    int centery = ((y1_new[0]+y1_new[1])/2);
+                    float hw = 0.5 * sqrt((x1[1]-x1[0])*(x1[1]-x1[0])+(y1_new[1]-y1_new[0])*(y1_new[1]-y1_new[0]));
+
+                    float slop = ((((x1[0]+x1[1])/2)-mx)/((1.0)*(((y1_new[0]+y1_new[1])/2)-my)));
+                    float theta = atan(abs((((x1[0]+x1[1])/2)-mx)/((1.0)*(((y1_new[0]+y1_new[1])/2)-my))));  printf("%f ",theta);
+
+                    x1[0] = ((x1[0]+x1[1])/2) - hw*cos(atan(((((x1[0]+x1[1])/2)-mx)/((1.0)*(((y1_new[0]+y1_new[1])/2)-my)))));
+                    x1[1] = ((x1[0]+x1[1])/2) + hw*cos(atan(((((x1[0]+x1[1])/2)-mx)/((1.0)*(((y1_new[0]+y1_new[1])/2)-my)))));
+
+                    y1_new[0] = ((y1_new[0]+y1_new[1])/2) + hw*sin(atan(((((x1[0]+x1[1])/2)-mx)/((1.0)*(((y1_new[0]+y1_new[1])/2)-my)))));
+                    y1_new[1] = ((y1_new[0]+y1_new[1])/2) - hw*sin(atan(((((x1[0]+x1[1])/2)-mx)/((1.0)*(((y1_new[0]+y1_new[1])/2)-my)))));*/
+
+                    //if(i==0){y1_new[1] -= 50 ;}
+                    //if(i==1){y1_new[1] += 500 ;}
+                }
+
+                if(i==1) {int temp=x1[0]; x1[0]=x1[1]; x1[1]=temp; temp=y1_new[0]; y1_new[0]=y1_new[1]; y1_new[1]=temp;} 
+                
                 px[0] = (x1[0] * cos(t) - y1_new[0] * sin(t));
                 px[1] = (x1[1] * cos(t) - y1_new[1] * sin(t));
                 px[2] = px[0];
@@ -443,7 +470,7 @@ void iKeyboard(unsigned char key) {
     if(key == 't') {mz+=4;}
     if(key == 'g') {mz-=4;}
 
-    if(key == 'f') {state=FIRE;}
+    if(key == 'f') {state=FIRE; int bx = (288-my)*tan(t) + mx; if(bx<316 && bx>300){jstate=jDEATH;}}
 
     if(key == 'b') {for(int i=0; i<1000; i++){for(int j=0; j<1000; j++){access[i][j]=0;}} load(); /*for(int i=0; i<600; i++){ int sum=0; for(int j=0; j<=600; j++){sum+=access[i][j];}printf("%d\n",sum);}*/ }
     if(key == 'c') {menu=0;}

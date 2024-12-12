@@ -49,6 +49,7 @@
 #include "textures/T_28.h"
 #include "textures/T_29.h"
 #include "textures/T_30.h"
+#include "textures/T_31.h"
 
 int numText=30;                          //number of textures
 int numSect= 0;                          //number of sectors
