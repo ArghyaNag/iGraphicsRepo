@@ -51,13 +51,13 @@ int menu=1;
 int fire_idx=0;
 int menu_idx=0;
 int state=IDLE;
-int jstate=jIDLE;
+int jstate[3];
 char gun_fire[15][100];
 char gun_idle[100];
 char* gun_image;
 char menupics[2100][100];
 char* menupic = "menu\\00001.bmp";
-int jagind=23;
+int jagind[3]={23,23,23};
 
 int sx[2], sz[4];
 int mx, my , mz ;
@@ -302,7 +302,7 @@ void iDrawLine(int sx0, int sx1, int sz0, int sz1) {
 void iDrawWall(int sx0, int sx1, int sz0, int sz1, int sz2, int sz3, int red, int green, int blue, int s, int i, int w) {
 
     int screenx,screenz;
-    int wt = W[w].wt; if(wt==0){wt=jagind;}
+    int wt = W[w].wt; if(wt==0){wt=jagind[s-55];}
     float ht = 0, ht_step=(float)Textures[wt].w*W[w].u/(float)(sx1-sx0);
 
     int dy = sz1 - sz0;
@@ -448,9 +448,12 @@ void update_menu(){
 }
 
 void update_jaguar(){
-   if(jstate==jIDLE) {jagind++; if(jagind>26){jagind=23;}}
-   else if(jstate==jFIRE) {jagind++; if(jagind>22){jagind=20;}}
-   else if(jstate==jDEATH) {jagind++; if(jagind>31){jagind=31;}}
+    for(int i=0; i<3; i++){
+        if(jstate[i]==jIDLE) {jagind[i]++; if(jagind[i]>26){jagind[i]=23;}}
+        else if(jstate[i]==jFIRE) {jagind[i]++; if(jagind[i]>22){jagind[i]=20;}}
+        else if(jstate[i]==jDEATH) {jagind[i]++; if(jagind[i]>31){jagind[i]=31;}}
+    }
+   
 }
 
 void iKeyboard(unsigned char key) {
@@ -470,14 +473,22 @@ void iKeyboard(unsigned char key) {
     if(key == 't') {mz+=4;}
     if(key == 'g') {mz-=4;}
 
-    if(key == 'f') {state=FIRE; int bx = (288-my)*tan(t) + mx; if(bx<316 && bx>300){jstate=jDEATH; jagind=24;}}
+    if(key == 'f') {
+        for(int i=0; i<3; i++){
+        state=FIRE; 
+        int bx = (W[S[i+55].ws].wy0-my)*tan(t) + mx; 
+        if(bx<(W[S[i+55].ws].wx1-4) && bx>(W[S[i+55].ws].wx0+12)){
+            jstate[i]=jDEATH; 
+            jagind[i]=24;}
+        }
+    }
 
     if(key == 'b') {for(int i=0; i<1000; i++){for(int j=0; j<1000; j++){access[i][j]=0;}} load(); /*for(int i=0; i<600; i++){ int sum=0; for(int j=0; j<=600; j++){sum+=access[i][j];}printf("%d\n",sum);}*/ }
     if(key == 'c') {menu=0;}
 
-    if(key == 'v') {jstate=jIDLE; jagind=23;}
+    /*if(key == 'v') {jstate=jIDLE; jagind=23;}
     if(key == 'n') {jstate=jFIRE; jagind=20;}
-    if(key == 'm') {jstate=jDEATH; jagind=27;}
+    if(key == 'm') {jstate=jDEATH; jagind=27;}*/
 
 	}
 
