@@ -92,7 +92,7 @@ struct sectors{
     int st,ss;
 };
 
-sectors S[128];
+sectors S[128], S1[128];
 
 typedef struct 
 {
@@ -109,8 +109,8 @@ void load()
  fscanf(fp,"%i",&numSect);   
  for(s=0;s<numSect;s++)      
  {
-  fscanf(fp,"%i",&S[s].ws);  
-  fscanf(fp,"%i",&S[s].we); 
+  fscanf(fp,"%i",&S[s].ws);  S1[s].ws=S[s].ws;
+  fscanf(fp,"%i",&S[s].we);  S1[s].we=S[s].we;
   fscanf(fp,"%i",&S[s].wz1);  
   fscanf(fp,"%i",&S[s].wz2); 
   fscanf(fp,"%i",&S[s].st); 
@@ -281,8 +281,8 @@ void iDraw() {
             
         }
     }
-    iShowBMP2(800,80,gun_image,0);
-    iShowBMP2(900,550,"shotgun\\crosshair.bmp",0);
+    iShowBMP2(790,80,gun_image,0);
+    iShowBMP2(910,550,"shotgun\\crosshair.bmp",0);
     iShowBMP2(0,0,"shotgun\\status_bar.bmp",-1);
     //testTextures();
 }}
@@ -302,7 +302,7 @@ void iDrawLine(int sx0, int sx1, int sz0, int sz1) {
 void iDrawWall(int sx0, int sx1, int sz0, int sz1, int sz2, int sz3, int red, int green, int blue, int s, int i, int w) {
 
     int screenx,screenz;
-    int wt = W[w].wt; if(wt==0){wt=jagind[s-55];}
+    int wt = W[w].wt; if(wt==200){wt=jagind[0];} if(wt==201){wt=jagind[1];} if(wt==202){wt=jagind[2];}
     float ht = 0, ht_step=(float)Textures[wt].w*W[w].u/(float)(sx1-sx0);
 
     int dy = sz1 - sz0;
@@ -341,7 +341,7 @@ void iDrawWall(int sx0, int sx1, int sz0, int sz1, int sz2, int sz3, int red, in
                 int red=Textures[wt].name[flag]-W[w].shade/2 ; if(red<0){red=0;} 
                 int green=Textures[wt].name[flag+1]-W[w].shade/2 ; //if(green<0){green=0;}
                 int blue=Textures[wt].name[flag+2]-W[w].shade/2 ; //if(blue<0){blue=0;}
-                if(W[w].wt==0 && 95<red && red<126 && 110<green && green<149 && 120<blue && blue<160){}
+                if((W[w].wt==200||W[w].wt==201||W[w].wt==202) && 95<red && red<126 && 110<green && green<149 && 120<blue && blue<160){}
                 else{iSetColor(red,green,blue);  //debug++; if(debug%100000000==0){printf("%d %d %d %d\n",red,green,blue,flag);}
                 iPoint(screenx,screenz);}
                 vt+=vt_step;
@@ -448,7 +448,14 @@ void update_menu(){
 }
 
 void update_jaguar(){
-        if(jstate[0]==jIDLE) {jagind[0]++; if(jagind[0]>26){jagind[0]=23;}}
+
+        for(int i=0; i<3; i++){
+        if(jstate[i]==jIDLE) {jagind[i]++; if(jagind[i]>26){jagind[i]=23;}}
+        else if(jstate[i]==jFIRE) {jagind[i]++; if(jagind[i]>22){jagind[i]=20;}}
+        else if(jstate[i]==jDEATH) {jagind[i]++; if(jagind[i]>31){jagind[i]=31;}}
+        }
+
+        /*if(jstate[0]==jIDLE) {jagind[0]++; if(jagind[0]>26){jagind[0]=23;}}
         else if(jstate[0]==jFIRE) {jagind[0]++; if(jagind[0]>22){jagind[0]=20;}}
         else if(jstate[0]==jDEATH) {jagind[0]++; if(jagind[0]>31){jagind[0]=31;}}
 
@@ -458,7 +465,7 @@ void update_jaguar(){
 
         if(jstate[2]==jIDLE) {jagind[2]++; if(jagind[2]>26){jagind[2]=23;}}
         else if(jstate[2]==jFIRE) {jagind[2]++; if(jagind[2]>22){jagind[2]=20;}}
-        else if(jstate[2]==jDEATH) {jagind[2]++; if(jagind[2]>31){jagind[2]=31;}}
+        else if(jstate[2]==jDEATH) {jagind[2]++; if(jagind[2]>31){jagind[2]=31;}}*/
    
 }
 
@@ -482,29 +489,22 @@ void iKeyboard(unsigned char key) {
     if(key == 'f') {
         state=FIRE; 
         
-        int bx0 = (W[S[0+55].ws].wy0-my)*tan(t) + mx; 
-        if(bx0<(W[S[0+55].ws].wx1-4) && bx0>(W[S[0+55].ws].wx0+12)){
-            jstate[0]=jDEATH; 
-            jagind[0]=24;}
-
-        int bx1 = (W[S[1+55].ws].wy0-my)*tan(t) + mx; 
-        if(bx1<(W[S[1+55].ws].wx1-4) && bx1>(W[S[1+55].ws].wx0+12)){
-            jstate[1]=jDEATH; 
-            jagind[1]=24;}
-
-        int bx2 = (W[S[2+55].ws].wy0-my)*tan(t) + mx; 
-        if(bx2<(W[S[2+55].ws].wx1-4) && bx2>(W[S[2+55].ws].wx0+12)){
-            jstate[2]=jDEATH; 
-            jagind[2]=24;}
+        for(int i=0; i<3; i++){
+        state=FIRE; 
+        int bx = (W[S1[i+55].ws].wy0-my)*tan(t) + mx; 
+        if(bx<(W[S1[i+55].ws].wx1-2) && bx>(W[S1[i+55].ws].wx0+12) && jstate[i]!=jDEATH){
+            jstate[i]=jDEATH; 
+            jagind[i]=24;}
+        }
         
     }
 
     if(key == 'b') {for(int i=0; i<1000; i++){for(int j=0; j<1000; j++){access[i][j]=0;}} load(); /*for(int i=0; i<600; i++){ int sum=0; for(int j=0; j<=600; j++){sum+=access[i][j];}printf("%d\n",sum);}*/ }
     if(key == 'c') {menu=0;}
 
-    /*if(key == 'v') {jstate=jIDLE; jagind=23;}
-    if(key == 'n') {jstate=jFIRE; jagind=20;}
-    if(key == 'm') {jstate=jDEATH; jagind=27;}*/
+    if(key == 'v') {for(int i=0; i<3; i++){jstate[i]=jIDLE; jagind[i]=23;}}
+    if(key == 'n') {for(int i=0; i<3; i++){jstate[i]=jFIRE; jagind[i]=20;}}
+    if(key == 'm') {for(int i=0; i<3; i++){jstate[i]=jDEATH; jagind[i]=27;}}
 
 	}
 
