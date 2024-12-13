@@ -38,6 +38,17 @@ int debug=0;
 #include "textures/T_29.h"
 #include "textures/T_30.h"
 #include "textures/T_31.h"
+#include "textures/T_32.h"
+#include "textures/T_33.h"
+#include "textures/T_34.h"
+#include "textures/T_35.h"
+#include "textures/T_36.h"
+#include "textures/T_37.h"
+#include "textures/T_38.h"
+#include "textures/T_39.h"
+#include "textures/T_40.h"
+#include "textures/T_41.h"
+#include "textures/T_42.h"
 
 int numText=20;                          
 int numSect= 0;                          
@@ -393,6 +404,17 @@ void inittexture(){
     Textures[29].name=(const unsigned char*)T_29; Textures[29].h=T_29_HEIGHT; Textures[29].w=T_29_WIDTH;
     Textures[30].name=(const unsigned char*)T_30; Textures[30].h=T_30_HEIGHT; Textures[30].w=T_30_WIDTH;
     Textures[31].name=(const unsigned char*)T_31; Textures[31].h=T_31_HEIGHT; Textures[31].w=T_31_WIDTH;
+    Textures[32].name=(const unsigned char*)T_32; Textures[32].h=T_32_HEIGHT; Textures[32].w=T_32_WIDTH;
+    Textures[33].name=(const unsigned char*)T_33; Textures[33].h=T_33_HEIGHT; Textures[33].w=T_33_WIDTH;
+    Textures[34].name=(const unsigned char*)T_34; Textures[34].h=T_34_HEIGHT; Textures[34].w=T_34_WIDTH;
+    Textures[35].name=(const unsigned char*)T_35; Textures[35].h=T_35_HEIGHT; Textures[35].w=T_35_WIDTH;
+    Textures[36].name=(const unsigned char*)T_36; Textures[36].h=T_36_HEIGHT; Textures[36].w=T_36_WIDTH;
+    Textures[37].name=(const unsigned char*)T_37; Textures[37].h=T_37_HEIGHT; Textures[37].w=T_37_WIDTH;
+    Textures[38].name=(const unsigned char*)T_38; Textures[38].h=T_38_HEIGHT; Textures[38].w=T_38_WIDTH;
+    Textures[39].name=(const unsigned char*)T_39; Textures[39].h=T_39_HEIGHT; Textures[39].w=T_39_WIDTH;
+    Textures[40].name=(const unsigned char*)T_40; Textures[40].h=T_40_HEIGHT; Textures[40].w=T_40_WIDTH;
+    Textures[41].name=(const unsigned char*)T_41; Textures[41].h=T_41_HEIGHT; Textures[41].w=T_41_WIDTH;
+    Textures[42].name=(const unsigned char*)T_42; Textures[42].h=T_42_HEIGHT; Textures[42].w=T_42_WIDTH;
     
     /*char texture_name[100];
     char texture_height[100];
@@ -449,10 +471,16 @@ void update_menu(){
 
 void update_jaguar(){
 
-        for(int i=0; i<3; i++){
+        for(int i=0; i<2; i++){
         if(jstate[i]==jIDLE) {jagind[i]++; if(jagind[i]>26){jagind[i]=23;}}
         else if(jstate[i]==jFIRE) {jagind[i]++; if(jagind[i]>22){jagind[i]=20;}}
         else if(jstate[i]==jDEATH) {jagind[i]++; if(jagind[i]>31){jagind[i]=31;}}
+        }
+
+        for(int i=2; i<3; i++){
+        if(jstate[i]==jIDLE) {jagind[i]++; if(jagind[i]>38){jagind[i]=35;}}
+        else if(jstate[i]==jFIRE) {jagind[i]++; if(jagind[i]>34){jagind[i]=32;}}
+        else if(jstate[i]==jDEATH) {jagind[i]++; if(jagind[i]>42){jagind[i]=42;}}
         }
 
         /*if(jstate[0]==jIDLE) {jagind[0]++; if(jagind[0]>26){jagind[0]=23;}}
@@ -494,7 +522,7 @@ void iKeyboard(unsigned char key) {
         int bx = (W[S1[i+55].ws].wy0-my)*tan(t) + mx; 
         if(bx<(W[S1[i+55].ws].wx1-2) && bx>(W[S1[i+55].ws].wx0+12) && jstate[i]!=jDEATH){
             jstate[i]=jDEATH; 
-            jagind[i]=24;}
+            }
         }
         
     }
