@@ -172,7 +172,7 @@ int dist(int x1,int y1, int x2,int y2);
     }
 }*/
 
-void iDraw() {
+void iDraw() {                                                                  
     iClear();
 
     if(menu==1){ iShowBMP2(0,0,menupic,-1);}
@@ -209,7 +209,7 @@ void iDraw() {
                 z1[0] = S[s].wz1 - mz;
                 z1[1] = S[s].wz1 - mz;
 
-                if(S[s].we-S[s].ws==2){
+                //if(S[s].we-S[s].ws==2){
 
                     /*int centerx = ((x1[0]+x1[1])/2);
                     int centery = ((y1_new[0]+y1_new[1])/2);
@@ -226,7 +226,7 @@ void iDraw() {
 
                     //if(i==0){y1_new[1] -= 50 ;}
                     //if(i==1){y1_new[1] += 500 ;}
-                }
+                
 
                 if(i==1) {int temp=x1[0]; x1[0]=x1[1]; x1[1]=temp; temp=y1_new[0]; y1_new[0]=y1_new[1]; y1_new[1]=temp;} 
                 
@@ -448,11 +448,17 @@ void update_menu(){
 }
 
 void update_jaguar(){
-    for(int i=0; i<3; i++){
-        if(jstate[i]==jIDLE) {jagind[i]++; if(jagind[i]>26){jagind[i]=23;}}
-        else if(jstate[i]==jFIRE) {jagind[i]++; if(jagind[i]>22){jagind[i]=20;}}
-        else if(jstate[i]==jDEATH) {jagind[i]++; if(jagind[i]>31){jagind[i]=31;}}
-    }
+        if(jstate[0]==jIDLE) {jagind[0]++; if(jagind[0]>26){jagind[0]=23;}}
+        else if(jstate[0]==jFIRE) {jagind[0]++; if(jagind[0]>22){jagind[0]=20;}}
+        else if(jstate[0]==jDEATH) {jagind[0]++; if(jagind[0]>31){jagind[0]=31;}}
+
+        if(jstate[1]==jIDLE) {jagind[1]++; if(jagind[1]>26){jagind[1]=23;}}
+        else if(jstate[1]==jFIRE) {jagind[1]++; if(jagind[1]>22){jagind[1]=20;}}
+        else if(jstate[1]==jDEATH) {jagind[1]++; if(jagind[1]>31){jagind[1]=31;}}
+
+        if(jstate[2]==jIDLE) {jagind[2]++; if(jagind[2]>26){jagind[2]=23;}}
+        else if(jstate[2]==jFIRE) {jagind[2]++; if(jagind[2]>22){jagind[2]=20;}}
+        else if(jstate[2]==jDEATH) {jagind[2]++; if(jagind[2]>31){jagind[2]=31;}}
    
 }
 
@@ -474,13 +480,23 @@ void iKeyboard(unsigned char key) {
     if(key == 'g') {mz-=4;}
 
     if(key == 'f') {
-        for(int i=0; i<3; i++){
         state=FIRE; 
-        int bx = (W[S[i+55].ws].wy0-my)*tan(t) + mx; 
-        if(bx<(W[S[i+55].ws].wx1-4) && bx>(W[S[i+55].ws].wx0+12)){
-            jstate[i]=jDEATH; 
-            jagind[i]=24;}
-        }
+        
+        int bx0 = (W[S[0+55].ws].wy0-my)*tan(t) + mx; 
+        if(bx0<(W[S[0+55].ws].wx1-4) && bx0>(W[S[0+55].ws].wx0+12)){
+            jstate[0]=jDEATH; 
+            jagind[0]=24;}
+
+        int bx1 = (W[S[1+55].ws].wy0-my)*tan(t) + mx; 
+        if(bx1<(W[S[1+55].ws].wx1-4) && bx1>(W[S[1+55].ws].wx0+12)){
+            jstate[1]=jDEATH; 
+            jagind[1]=24;}
+
+        int bx2 = (W[S[2+55].ws].wy0-my)*tan(t) + mx; 
+        if(bx2<(W[S[2+55].ws].wx1-4) && bx2>(W[S[2+55].ws].wx0+12)){
+            jstate[2]=jDEATH; 
+            jagind[2]=24;}
+        
     }
 
     if(key == 'b') {for(int i=0; i<1000; i++){for(int j=0; j<1000; j++){access[i][j]=0;}} load(); /*for(int i=0; i<600; i++){ int sum=0; for(int j=0; j<=600; j++){sum+=access[i][j];}printf("%d\n",sum);}*/ }

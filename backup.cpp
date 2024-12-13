@@ -1,5 +1,6 @@
 #include "iGraphics.h"
 #include<algorithm>
+#include<cmath>
 
 int debug=0;
 
@@ -25,22 +26,49 @@ int debug=0;
 #include "textures/T_17.h"
 #include "textures/T_18.h"
 #include "textures/T_19.h"
-int numText=19;                          
+#include "textures/T_20.h"
+#include "textures/T_21.h"
+#include "textures/T_22.h"
+#include "textures/T_23.h"
+#include "textures/T_24.h"
+#include "textures/T_25.h"
+#include "textures/T_26.h"
+#include "textures/T_27.h"
+#include "textures/T_28.h"
+#include "textures/T_29.h"
+#include "textures/T_30.h"
+#include "textures/T_31.h"
+
+int numText=20;                          
 int numSect= 0;                          
-int numWall= 0;                          
-        
+int numWall= 0;         
 
 int access[1000][1000]; 
+int backx0,backy0,backx1,backy1,frontx0,fronty0,frontx1,fronty1;
 enum {IDLE,FIRE};
+enum {jIDLE,jFIRE,jDEATH};
+int menu=1;
 int fire_idx=0;
+int menu_idx=0;
 int state=IDLE;
+int jstate=jIDLE;
 char gun_fire[15][100];
 char gun_idle[100];
 char* gun_image;
+char menupics[2100][100];
+char* menupic = "menu\\00001.bmp";
+int jagind=23;
 
 int sx[2], sz[4];
 int mx, my , mz ;
 float t, g=1 ;
+
+struct enemystats{
+    int isEnemy;
+    int shotcount;
+};
+
+enemystats enemy[100];
 
 struct walls{
     int wx0, wy0;
@@ -75,7 +103,6 @@ typedef struct
 void load()
 {
  FILE *fp = fopen("level.h","r");
- if(fp == NULL){ printf("Error opening level.h"); return;}
  if(fp == NULL){return;}
  int s,w;
 
@@ -87,7 +114,7 @@ void load()
   fscanf(fp,"%i",&S[s].wz1);  
   fscanf(fp,"%i",&S[s].wz2); 
   fscanf(fp,"%i",&S[s].st); 
-  fscanf(fp,"%i",&S[s].ss);  
+  fscanf(fp,"%i",&S[s].ss);   
  }
  fscanf(fp,"%i",&numWall);   
  for(s=0;s<numWall;s++)      
@@ -100,7 +127,30 @@ void load()
   fscanf(fp,"%i",&W[s].u); 
   fscanf(fp,"%i",&W[s].v);  
   fscanf(fp,"%i",&W[s].shade);  
- }
+
+  if(s%4==0 && s>11){backx0=W[s].wx0; backy0=W[s].wy0; backx1=W[s].wx1; backy1=W[s].wy1;}  
+  else if(s%2==0 && s>11){
+
+    frontx0=W[s].wx0; fronty0=W[s].wy0; frontx1=W[s].wx1; fronty1=W[s].wy1;
+
+    if(backy0==backy1){
+        for(int i=std::min(backx0,backx1); i<=std::max(backx0,backx1);i++){
+            for(int j=std::min(backy0,fronty1); j<=std::max(backy0,fronty1); j++){
+                access[i][j]=1;
+            }
+        }
+    }
+    else if(backx0==backx1){
+        for(int i=backy0; i<=backy1;i++){
+            for(int j=frontx1; j<=backx0; j++){
+                access[j][i]=1;
+            }
+        }
+    }
+   }
+    }
+  
+
  fscanf(fp,"%i %i %i %i %i",&mx,&my,&mz, &t,&g); 
  fclose(fp); 
 }
@@ -110,7 +160,7 @@ void iDrawWall(int sx0, int sx1, int sz0, int sz1, int sz2, int sz3, int red, in
 void clipBehindPlayer(int *x1,int *y1,int *z1, int x2,int y2,int z2);
 int dist(int x1,int y1, int x2,int y2);
 
-void testTextures(){
+/*void testTextures(){
     int x,y,t;
     t=0;
     for(y=0;y<Textures[t].h;y++){
@@ -120,25 +170,28 @@ void testTextures(){
             iPoint(x,y+200);
         }
     }
-}
+}*/
 
 void iDraw() {
     iClear();
 
+    if(menu==1){ iShowBMP2(0,0,menupic,-1);}
+
+    if(menu==0){
     int ax[2] = {40, 40}, ay[2] = {10, 290}, az[2] = {0, 0}, loop;
     int x1[2], y1_new[2], z1[2];
     int px[4], py[4], pz[4];
 
     for(int s=0;s<numSect-1;s++){    
-        for(int w=0;w<numSect-s-1;w++){
+        for(int w=1;w<numSect-s-1;w++){
             if(S[w].d<S[w+1].d){ 
                 sectors stemp=S[w]; S[w]=S[w+1]; S[w+1]=stemp; 
             }
         }
     }
-
+    
     for(int s=0; s<numSect; s++){
-
+        
         S[s].d=0;
 
         if(mz<S[s].wz1){S[s].toporbottom=1; loop=2; for(int i=0; i<1920; i++){S[s].points[i]=1040;}}
@@ -156,8 +209,27 @@ void iDraw() {
                 z1[0] = S[s].wz1 - mz;
                 z1[1] = S[s].wz1 - mz;
 
-                if(i==1) {int temp=x1[0]; x1[0]=x1[1]; x1[1]=temp; temp=y1_new[0]; y1_new[0]=y1_new[1]; y1_new[1]=temp;} 
+                if(S[s].we-S[s].ws==2){
 
+                    /*int centerx = ((x1[0]+x1[1])/2);
+                    int centery = ((y1_new[0]+y1_new[1])/2);
+                    float hw = 0.5 * sqrt((x1[1]-x1[0])*(x1[1]-x1[0])+(y1_new[1]-y1_new[0])*(y1_new[1]-y1_new[0]));
+
+                    float slop = ((((x1[0]+x1[1])/2)-mx)/((1.0)*(((y1_new[0]+y1_new[1])/2)-my)));
+                    float theta = atan(abs((((x1[0]+x1[1])/2)-mx)/((1.0)*(((y1_new[0]+y1_new[1])/2)-my))));  printf("%f ",theta);
+
+                    x1[0] = ((x1[0]+x1[1])/2) - hw*cos(atan(((((x1[0]+x1[1])/2)-mx)/((1.0)*(((y1_new[0]+y1_new[1])/2)-my)))));
+                    x1[1] = ((x1[0]+x1[1])/2) + hw*cos(atan(((((x1[0]+x1[1])/2)-mx)/((1.0)*(((y1_new[0]+y1_new[1])/2)-my)))));
+
+                    y1_new[0] = ((y1_new[0]+y1_new[1])/2) + hw*sin(atan(((((x1[0]+x1[1])/2)-mx)/((1.0)*(((y1_new[0]+y1_new[1])/2)-my)))));
+                    y1_new[1] = ((y1_new[0]+y1_new[1])/2) - hw*sin(atan(((((x1[0]+x1[1])/2)-mx)/((1.0)*(((y1_new[0]+y1_new[1])/2)-my)))));*/
+
+                    //if(i==0){y1_new[1] -= 50 ;}
+                    //if(i==1){y1_new[1] += 500 ;}
+                }
+
+                if(i==1) {int temp=x1[0]; x1[0]=x1[1]; x1[1]=temp; temp=y1_new[0]; y1_new[0]=y1_new[1]; y1_new[1]=temp;} 
+                
                 px[0] = (x1[0] * cos(t) - y1_new[0] * sin(t));
                 px[1] = (x1[1] * cos(t) - y1_new[1] * sin(t));
                 px[2] = px[0];
@@ -174,7 +246,7 @@ void iDraw() {
                 pz[1] = z1[1] + (g * py[1] / 32.0);
                 pz[2] = S[s].wz2 - mz + (g * py[0] / 32.0);
                 pz[3] = S[s].wz2 - mz + (g * py[1] / 32.0);
-
+                
                 if(py[0]<1 && py[1]<1){continue;}
                 if(py[0]<1){
 
@@ -206,18 +278,18 @@ void iDraw() {
                 iDrawWall(sx[0],sx[1],sz[0],sz[1],sz[2],sz[3],W[w].red,W[w].green,W[w].blue,s,i,w);
             }
             S[s].d/=(S[s].we-S[s].ws);  
-
+            
         }
     }
     iShowBMP2(800,80,gun_image,0);
     iShowBMP2(900,550,"shotgun\\crosshair.bmp",0);
     iShowBMP2(0,0,"shotgun\\status_bar.bmp",-1);
-    testTextures();
-}
+    //testTextures();
+}}
 
 
 
-void iDrawLine(int sx0, int sx1, int sz0, int sz1) {
+void iDrawLine(int sx0, int sx1, int sz0, int sz1) { 
 
     for(int screenx=sx0; screenx<=sx1; screenx++)
     {
@@ -230,7 +302,7 @@ void iDrawLine(int sx0, int sx1, int sz0, int sz1) {
 void iDrawWall(int sx0, int sx1, int sz0, int sz1, int sz2, int sz3, int red, int green, int blue, int s, int i, int w) {
 
     int screenx,screenz;
-    int wt = W[w].wt;
+    int wt = W[w].wt; if(wt==0){wt=jagind;}
     float ht = 0, ht_step=(float)Textures[wt].w*W[w].u/(float)(sx1-sx0);
 
     int dy = sz1 - sz0;
@@ -249,7 +321,7 @@ void iDrawWall(int sx0, int sx1, int sz0, int sz1, int sz2, int sz3, int red, in
         int screenz2 = dz*(screenx-sx0backup+0.5)/dx + sz2;
 
         float vt = 0, vt_step=(float)Textures[wt].h*W[w].v/(float)(screenz2-screenz1);
-
+ 
         if(screenz1<1){vt-=vt_step*screenz1; screenz1=1;}
         if(screenz2<1){screenz2=1;}
         if(screenz1>1040){screenz1=1040;}
@@ -259,7 +331,7 @@ void iDrawWall(int sx0, int sx1, int sz0, int sz1, int sz2, int sz3, int red, in
         if(S[s].toporbottom==2){S[s].points[screenx]=screenz2; continue;}
         if(S[s].toporbottom==-1){ for(int screenz=S[s].points[screenx]; screenz<screenz1; screenz++){iSetColor(S[s].bottomred,S[s].bottomgreen,S[s].bottomblue); iPoint(screenx,screenz);}}
         if(S[s].toporbottom==-2){ for(int screenz=screenz2; screenz<S[s].points[screenx]; screenz++){iSetColor(S[s].topred,S[s].topgreen,S[s].topblue); iPoint(screenx,screenz);}}*/
-
+        
         if(i==0)
         {
             if(S[s].toporbottom==1){ S[s].points[screenx] = screenz1;}
@@ -269,8 +341,9 @@ void iDrawWall(int sx0, int sx1, int sz0, int sz1, int sz2, int sz3, int red, in
                 int red=Textures[wt].name[flag]-W[w].shade/2 ; if(red<0){red=0;} 
                 int green=Textures[wt].name[flag+1]-W[w].shade/2 ; //if(green<0){green=0;}
                 int blue=Textures[wt].name[flag+2]-W[w].shade/2 ; //if(blue<0){blue=0;}
-                iSetColor(red,green,blue);  debug++; if(debug%100000000==0){printf("%d %d %d %d\n",red,green,blue,flag);}
-                iPoint(screenx,screenz);
+                if(W[w].wt==0 && 95<red && red<126 && 110<green && green<149 && 120<blue && blue<160){}
+                else{iSetColor(red,green,blue);  //debug++; if(debug%100000000==0){printf("%d %d %d %d\n",red,green,blue,flag);}
+                iPoint(screenx,screenz);}
                 vt+=vt_step;
             }
             ht+=ht_step;
@@ -284,7 +357,7 @@ void iDrawWall(int sx0, int sx1, int sz0, int sz1, int sz2, int sz3, int red, in
         }
 
     }
-
+    
 }
 
 void inittexture(){
@@ -308,8 +381,19 @@ void inittexture(){
     Textures[17].name=(const unsigned char*)T_17; Textures[17].h=T_17_HEIGHT; Textures[17].w=T_17_WIDTH;
     Textures[18].name=(const unsigned char*)T_18; Textures[18].h=T_18_HEIGHT; Textures[18].w=T_18_WIDTH;
     Textures[19].name=(const unsigned char*)T_19; Textures[19].h=T_19_HEIGHT; Textures[19].w=T_19_WIDTH;
-
-
+    Textures[20].name=(const unsigned char*)T_20; Textures[20].h=T_20_HEIGHT; Textures[20].w=T_20_WIDTH;
+    Textures[21].name=(const unsigned char*)T_21; Textures[21].h=T_21_HEIGHT; Textures[21].w=T_21_WIDTH;
+    Textures[22].name=(const unsigned char*)T_22; Textures[22].h=T_22_HEIGHT; Textures[22].w=T_22_WIDTH;
+    Textures[23].name=(const unsigned char*)T_23; Textures[23].h=T_23_HEIGHT; Textures[23].w=T_23_WIDTH;
+    Textures[24].name=(const unsigned char*)T_24; Textures[24].h=T_24_HEIGHT; Textures[24].w=T_24_WIDTH;
+    Textures[25].name=(const unsigned char*)T_25; Textures[25].h=T_25_HEIGHT; Textures[25].w=T_25_WIDTH;
+    Textures[26].name=(const unsigned char*)T_26; Textures[26].h=T_26_HEIGHT; Textures[26].w=T_26_WIDTH;
+    Textures[27].name=(const unsigned char*)T_27; Textures[27].h=T_27_HEIGHT; Textures[27].w=T_27_WIDTH;
+    Textures[28].name=(const unsigned char*)T_28; Textures[28].h=T_28_HEIGHT; Textures[28].w=T_28_WIDTH;
+    Textures[29].name=(const unsigned char*)T_29; Textures[29].h=T_29_HEIGHT; Textures[29].w=T_29_WIDTH;
+    Textures[30].name=(const unsigned char*)T_30; Textures[30].h=T_30_HEIGHT; Textures[30].w=T_30_WIDTH;
+    Textures[31].name=(const unsigned char*)T_31; Textures[31].h=T_31_HEIGHT; Textures[31].w=T_31_WIDTH;
+    
     /*char texture_name[100];
     char texture_height[100];
     char texture_width[100];
@@ -324,12 +408,21 @@ void inittexture(){
 
 }
 
+
+
 void populate_gun_images(){
     sprintf(gun_idle, "shotgun\\file_0-triangle.bmp");
     for(int i=0; i<15; i++){
         sprintf(gun_fire[i], "shotgun\\file_%d-triangle.bmp",i);
     }
     gun_image = gun_idle;
+}
+
+void populate_menu_images(){
+    for(int i=0; i<2000; i++){
+        sprintf(menupics[i], "menu\\%05d.bmp",i+1);
+    }
+   
 }
 
 void update_gun(){
@@ -347,30 +440,48 @@ void update_gun(){
     }
 }
 
+void update_menu(){
+   
+            menupic = menupics[menu_idx];
+            menu_idx = (menu_idx + 1) % 2000; 
+
+}
+
+void update_jaguar(){
+   if(jstate==jIDLE) {jagind++; if(jagind>26){jagind=23;}}
+   else if(jstate==jFIRE) {jagind++; if(jagind>22){jagind=20;}}
+   else if(jstate==jDEATH) {jagind++; if(jagind>31){jagind=31;}}
+}
+
 void iKeyboard(unsigned char key) {
-	if (key == 'j') {t-=0.07; if(t<0){t+=6.30;}}
-    if( key == 'l') {t+=0.07; if(t>6.30){t-=6.30;}}
+	if (key == 'j') {t-=0.035; if(t<0){t+=6.30;}}
+    if( key == 'l') {t+=0.035; if(t>6.30){t-=6.30;}}
     if (key == 'i') {g-=1;}
     if (key == 'k') {g+=1;}
 
-    int dx= sin(t)*10;
-    int dy= cos(t)*10;
+    int dx= sin(t)*7;
+    int dy= cos(t)*7;
 
-    if (key == 'a') {mx-=dy; my+=dx;}
-    if (key == 'd') {mx+=dy; my-=dx;}
-    if (key == 'w') {mx+=dx; my+=dy;}
-    if (key == 's') {mx-=dx; my-=dy;}
+    if (key == 'a') {if(access[mx-dy][my+dx]==0){mx-=dy; my+=dx;}}
+    if (key == 'd') {if(access[mx+dy][my-dx]==0){mx+=dy; my-=dx;}}
+    if (key == 'w') {if(access[mx+dx][my+dy]==0){mx+=dx; my+=dy;}}
+    if (key == 's') {if(access[mx-dx][my-dy]==0){mx-=dx; my-=dy;}}
 
     if(key == 't') {mz+=4;}
     if(key == 'g') {mz-=4;}
 
-    if(key == 'f') {state=FIRE;}
+    if(key == 'f') {state=FIRE; int bx = (288-my)*tan(t) + mx; if(bx<316 && bx>300){jstate=jDEATH; jagind=24;}}
 
-    if(key == 'b') {load();}
+    if(key == 'b') {for(int i=0; i<1000; i++){for(int j=0; j<1000; j++){access[i][j]=0;}} load(); /*for(int i=0; i<600; i++){ int sum=0; for(int j=0; j<=600; j++){sum+=access[i][j];}printf("%d\n",sum);}*/ }
+    if(key == 'c') {menu=0;}
+
+    if(key == 'v') {jstate=jIDLE; jagind=23;}
+    if(key == 'n') {jstate=jFIRE; jagind=20;}
+    if(key == 'm') {jstate=jDEATH; jagind=27;}
 
 	}
 
-
+	
 void pixelhishab() {
 
 }
@@ -401,11 +512,11 @@ void iMouse(int button, int state, int mx, int my) {
 	if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN) {
 		//place your codes here
 		//	printf("x = %d, y= %d\n",mx,my);
-
+		
 	}
 	if (button == GLUT_RIGHT_BUTTON && state == GLUT_DOWN) {
 		//place your codes here
-
+		
 	}
 }
 
@@ -426,7 +537,10 @@ int main() {
     //initwalls();
     inittexture();
     populate_gun_images();
+    populate_menu_images();
     iSetTimer(100, update_gun);
+    iSetTimer(57, update_menu);
+    iSetTimer(150,update_jaguar);
     iSetTimer(3000, check);
     mx=0,my=0,mz=0;
     //float t=0,g=0;
