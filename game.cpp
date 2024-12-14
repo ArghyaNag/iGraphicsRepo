@@ -437,7 +437,6 @@ void inittexture(){
 }
 
 
-
 void populate_gun_images(){
     sprintf(gun_idle, "shotgun\\file_0-triangle.bmp");
     for(int i=0; i<15; i++){
@@ -549,12 +548,14 @@ void iKeyboard(unsigned char key) {
         state=FIRE; 
         
         for(int i=0; i<3; i++){
-        state=FIRE; 
-        int bx = (W[S1[i+55].ws].wy0-my)*tan(t) + mx; 
-        if(bx<(W[S1[i+55].ws].wx1-2) && bx>(W[S1[i+55].ws].wx0+12) && jstate[i]!=jDEATH){
-            jstate[i]=jDEATH; 
-            if(i==2){jagind[i]=35;}
-            else{jagind[i]=24;}
+            if(jstate[i]!=jIDLE){
+                state=FIRE; 
+                int bx = (W[S1[i+55].ws].wy0-my)*tan(t) + mx; 
+                if(bx<(W[S1[i+55].ws].wx1-2) && bx>(W[S1[i+55].ws].wx0+12) && jstate[i]!=jDEATH){
+                    jstate[i]=jDEATH; 
+                    if(i==2){jagind[i]=35;}
+                    else{jagind[i]=24;}
+                }
             }
         }
         }
