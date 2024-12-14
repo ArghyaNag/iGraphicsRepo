@@ -56,6 +56,7 @@ int numWall= 0;
 
 int access[1000][1000]; 
 int score=0;
+int health=100;
 int backx0,backy0,backx1,backy1,frontx0,fronty0,frontx1,fronty1;
 enum {IDLE,FIRE};
 enum {jIDLE,jFIRE,jDEATH};
@@ -64,6 +65,7 @@ int fire_idx=0;
 int menu_idx=0;
 int state=IDLE;
 int jstate[3];
+char healthstring[100]="HEALTH= 0";
 char scorestring[100]="SCORE= 0";
 char gun_fire[15][100];
 char gun_idle[100];
@@ -298,6 +300,7 @@ void iDraw() {
     iShowBMP2(910,550,"shotgun\\crosshair.bmp",0);
     iShowBMP2(0,0,"shotgun\\status_bar.bmp",-1);
     iText(100,900,scorestring,GLUT_BITMAP_TIMES_ROMAN_24);
+    iText(1500,900,healthstring,GLUT_BITMAP_TIMES_ROMAN_24);
     //testTextures();
 }}
 
@@ -476,13 +479,13 @@ void update_jaguar(){
 
         for(int i=0; i<2; i++){
         if(jstate[i]==jIDLE) {jagind[i]++; if(jagind[i]>26){jagind[i]=23;}}
-        else if(jstate[i]==jFIRE) {jagind[i]++; if(jagind[i]>22){jagind[i]=20;} if(jagind[i]==22){}}
+        else if(jstate[i]==jFIRE) {jagind[i]++; if(jagind[i]>22){jagind[i]=20;} if(jagind[i]==22){health--; sprintf(healthstring,"HEALTH: %d",health);}}
         else if(jstate[i]==jDEATH) {jagind[i]++; if(jagind[i]>31){jagind[i]=31;} if(jagind[i]==29){score++; sprintf(scorestring,"SCORE: %d",score);}}
         }
 
         for(int i=2; i<3; i++){
         if(jstate[i]==jIDLE) {jagind[i]++; if(jagind[i]>38){jagind[i]=35;}}
-        else if(jstate[i]==jFIRE) {jagind[i]++; if(jagind[i]>34){jagind[i]=32;}}
+        else if(jstate[i]==jFIRE) {jagind[i]++; if(jagind[i]>34){jagind[i]=32;} if(jagind[i]==34){health--; sprintf(healthstring,"HEALTH: %d",health);}}
         else if(jstate[i]==jDEATH) {jagind[i]++; if(jagind[i]>42){jagind[i]=42;} if(jagind[i]==39){score++; sprintf(scorestring,"SCORE: %d",score);}}
         }
 
