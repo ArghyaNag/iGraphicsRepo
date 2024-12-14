@@ -54,6 +54,7 @@ int numText=20;
 int numSect= 0;                          
 int numWall= 0;         
 
+int bob1=-1,bob2=1, hit=0;
 int access[1000][1000]; 
 int leaderboard[5], leadcount=0;
 int runorfire[3]={0,0,0};
@@ -309,6 +310,7 @@ void iDraw() {
         iText(100,900,scorestring,GLUT_BITMAP_TIMES_ROMAN_24);
         iText(1500,900,healthstring,GLUT_BITMAP_TIMES_ROMAN_24);
         iText(800,900,timerstring,GLUT_BITMAP_TIMES_ROMAN_24);
+        if(hit==1){iShowBMP2(0,0,"shotgun\\hit.bmp",0);}
         //testTextures();
     }
     if(score==3 && menu==1){
@@ -319,11 +321,11 @@ void iDraw() {
     if(menu==2){
         iShowBMP(0,0,"shotgun\\leaderboard.bmp");
         iSetColor(100,255,100);
-        iText(1000,700,leaderstring[0],GLUT_BITMAP_TIMES_ROMAN_24);
-        iText(1000,600,leaderstring[1],GLUT_BITMAP_TIMES_ROMAN_24);
-        iText(1000,500,leaderstring[2],GLUT_BITMAP_TIMES_ROMAN_24);
-        iText(1000,400,leaderstring[3],GLUT_BITMAP_TIMES_ROMAN_24);
-        iText(1000,300,leaderstring[4],GLUT_BITMAP_TIMES_ROMAN_24);
+        iText(1070,662,leaderstring[0],GLUT_BITMAP_TIMES_ROMAN_24);
+        iText(1070,568,leaderstring[1],GLUT_BITMAP_TIMES_ROMAN_24);
+        iText(1070,467,leaderstring[2],GLUT_BITMAP_TIMES_ROMAN_24);
+        iText(1070,370,leaderstring[3],GLUT_BITMAP_TIMES_ROMAN_24);
+        iText(1070,275,leaderstring[4],GLUT_BITMAP_TIMES_ROMAN_24);
     }
 }
 
@@ -518,6 +520,14 @@ void populate_menu_images(){
    
 }
 
+void headbob(){
+    if(bob1==1){mx+=50*bob1; bob1=-1;}
+    if(bob1==-1){mx+=50*bob1; bob1=1;}
+
+    if(bob2==1){mz+=50*bob2; bob2=-1;}
+    if(bob1==-1){mz+=50*bob2; bob2=1;}
+}
+
 void update_gun(){
     switch(state){
         case IDLE:
@@ -545,14 +555,14 @@ void update_jaguar(){
         for(int i=0; i<2; i++){
             if(jstate[i]==jIDLE) {jagind[i]=20;}
         else if(jstate[i]==jRUN) {jagind[i]++; if(jagind[i]>26){jagind[i]=23;}}
-        else if(jstate[i]==jFIRE) {jagind[i]++; if(jagind[i]>22){jagind[i]=20;} if(jagind[i]==21){health--; sprintf(healthstring,"HEALTH: %d",health);}}
+        else if(jstate[i]==jFIRE) {jagind[i]++; if(jagind[i]>22){jagind[i]=20;} if(jagind[i]==21){health--; hit=1; sprintf(healthstring,"HEALTH: %d",health);}}
         else if(jstate[i]==jDEATH) {jagind[i]++; if(jagind[i]>31){jagind[i]=31;} if(jagind[i]==29){score++; sprintf(scorestring,"SCORE: %d",score);}}
         }
 
         for(int i=2; i<3; i++){
             if(jstate[i]==jIDLE) {jagind[i]=32;}
         else if(jstate[i]==jRUN) {jagind[i]++; if(jagind[i]>38){jagind[i]=35;}}
-        else if(jstate[i]==jFIRE) {jagind[i]++; if(jagind[i]>34){jagind[i]=32;} if(jagind[i]==33){health--; sprintf(healthstring,"HEALTH: %d",health);}}
+        else if(jstate[i]==jFIRE) {jagind[i]++; if(jagind[i]>34){jagind[i]=32;} if(jagind[i]==33){health--;  hit=1; sprintf(healthstring,"HEALTH: %d",health);}}
         else if(jstate[i]==jDEATH) {jagind[i]++; if(jagind[i]>42){jagind[i]=42;} if(jagind[i]==39){score++; sprintf(scorestring,"SCORE: %d",score);}}
         }
 
@@ -570,14 +580,18 @@ void update_jaguar(){
    
 }
 
+void update_hit(){
+    hit=0;
+}
+
 void update_jstate(){
     for(int i=0; i<3; i++){
         if(jstate[i]!=jDEATH){
         int seeflag=0;
-        int jx0 = W[S1[i+101].ws].wx0;
-        int jx1 = W[S1[i+101].ws].wx1;
+        int jx0 = W[S1[i+99].ws].wx0;
+        int jx1 = W[S1[i+99].ws].wx1;
         int jx = (jx0+jx1)/2;
-        int jy = W[S1[i+101].ws].wy0;
+        int jy = W[S1[i+99].ws].wy0;
         for(int k=my; k<jy; k++){
             int j = mx + (jx0-mx)*(k-my)/(jy-my);
             if(access[j][k]==1){seeflag++; printf("j %d k %d mx %d my %d jx %d jy %d \n",j,k,mx,my,jx,jy); jstate[i]=jIDLE; break;}
@@ -615,8 +629,8 @@ void iKeyboard(unsigned char key) {
         for(int i=0; i<3; i++){
             if(jstate[i]!=jIDLE){
                 state=FIRE; 
-                int bx = (W[S1[i+101].ws].wy0-my)*tan(t) + mx; 
-                if(bx<(W[S1[i+101].ws].wx1-2) && bx>(W[S1[i+101].ws].wx0+12) && jstate[i]!=jDEATH){
+                int bx = (W[S1[i+99].ws].wy0-my)*tan(t) + mx; 
+                if(bx<(W[S1[i+99].ws].wx1-2) && bx>(W[S1[i+99].ws].wx0+12) && jstate[i]!=jDEATH){
                     jstate[i]=jDEATH; 
                     if(i==2){jagind[i]=35;}
                     else{jagind[i]=24;}
@@ -627,8 +641,8 @@ void iKeyboard(unsigned char key) {
     }
 
     if(key == 'b') {for(int i=0; i<1000; i++){for(int j=0; j<1000; j++){access[i][j]=0;}} load(); /*for(int i=0; i<600; i++){ int sum=0; for(int j=0; j<=600; j++){sum+=access[i][j];}printf("%d\n",sum);}*/ }
-    if(key == 'c') {menu=1; score=0; timer=0; health=100; for(int i=0; i<3; i++){jstate[i]=jRUN; jagind[i]=23;} sprintf(healthstring,"HEALTH: %d",health); sprintf(scorestring,"SCORE: %d",score); load();} 
-    if(key == 'q' && score==3 && menu==1) {menu=2;}
+    if(key == 'c' && menu==0) {menu=1; score=0; timer=0; health=100; for(int i=0; i<3; i++){jstate[i]=jRUN; jagind[i]=23;} sprintf(healthstring,"HEALTH: %d",health); sprintf(scorestring,"SCORE: %d",score); load();} 
+    if(key == 'c' && score==3 && menu==1) {menu=2;}
     if(key == 'h' && menu==0) {menu=2;}
     if(key == 'x' && menu==2) {menu=0;} 
 
@@ -707,6 +721,8 @@ int main() {
     iSetTimer(150,update_jaguar);
     iSetTimer(600,update_jstate);
     iSetTimer(17,update_time);
+    //iSetTimer(500,headbob);
+    iSetTimer(120,update_hit);
     //iSetTimer(3000, check);
     mx=0,my=0,mz=0;
     //float t=0,g=0;
