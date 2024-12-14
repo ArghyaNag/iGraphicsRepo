@@ -300,6 +300,7 @@ void iDraw() {
     iShowBMP2(790,80,gun_image,0);
     iShowBMP2(910,550,"shotgun\\crosshair.bmp",0);
     iShowBMP2(0,0,"shotgun\\status_bar.bmp",-1);
+    iSetColor(100,255,100);
     iText(100,900,scorestring,GLUT_BITMAP_TIMES_ROMAN_24);
     iText(1500,900,healthstring,GLUT_BITMAP_TIMES_ROMAN_24);
     //testTextures();
