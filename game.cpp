@@ -237,7 +237,7 @@ void iDraw() {
                     x1[1] = ((x1[0]+x1[1])/2) + hw*cos(atan(((((x1[0]+x1[1])/2)-mx)/((1.0)*(((y1_new[0]+y1_new[1])/2)-my)))));
 
                     y1_new[0] = ((y1_new[0]+y1_new[1])/2) + hw*sin(atan(((((x1[0]+x1[1])/2)-mx)/((1.0)*(((y1_new[0]+y1_new[1])/2)-my)))));
-                    y1_new[1] = ((y1_new[0]+y1_new[1])/2) - hw*sin(atan(((((x1[0]+x1[1])/2)-mx)/((1.0)*(((y1_new[0]+y1_new[1])/2)-my)))));*/
+                    y1_new[1] = ((y1_new[0]+y1_new[1])/2) - hw*sin(atan(((((x1[0]+x1[1])/2)-mx)/((1.0)*(((y1_new[0]+y1_new[1])/2)-my)))));}*/
 
                     //if(i==0){y1_new[1] -= 50 ;}
                     //if(i==1){y1_new[1] += 500 ;}
@@ -545,6 +545,7 @@ void iKeyboard(unsigned char key) {
     if(key == 'g') {mz-=4;}
 
     if(key == 'f') {
+        if(state!=FIRE){
         state=FIRE; 
         
         for(int i=0; i<3; i++){
@@ -556,7 +557,7 @@ void iKeyboard(unsigned char key) {
             else{jagind[i]=24;}
             }
         }
-        
+        }
     }
 
     if(key == 'b') {for(int i=0; i<1000; i++){for(int j=0; j<1000; j++){access[i][j]=0;}} load(); /*for(int i=0; i<600; i++){ int sum=0; for(int j=0; j<=600; j++){sum+=access[i][j];}printf("%d\n",sum);}*/ }
