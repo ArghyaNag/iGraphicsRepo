@@ -518,8 +518,8 @@ void update_jstate(){
             if(access[j][k]==1){seeflag++; printf("j %d k %d mx %d my %d jx %d jy %d \n",j,k,mx,my,jx,jy); jstate[i]=jIDLE; break;}
         }
         if(seeflag==0){
-            runorfire[i]++;
-            if(runorfire[i]>5){ runorfire[i]=0; jstate[i]=jFIRE;}
+            runorfire[i]=rand()%6;
+            if(runorfire[i]==5){jstate[i]=jFIRE;}
             else{jstate[i]=jRUN;}
         }
         }
