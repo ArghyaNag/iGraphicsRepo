@@ -38,26 +38,42 @@ int debug=0;
 #include "textures/T_29.h"
 #include "textures/T_30.h"
 #include "textures/T_31.h"
+#include "textures/T_32.h"
+#include "textures/T_33.h"
+#include "textures/T_34.h"
+#include "textures/T_35.h"
+#include "textures/T_36.h"
+#include "textures/T_37.h"
+#include "textures/T_38.h"
+#include "textures/T_39.h"
+#include "textures/T_40.h"
+#include "textures/T_41.h"
+#include "textures/T_42.h"
 
 int numText=20;                          
 int numSect= 0;                          
 int numWall= 0;         
 
 int access[1000][1000]; 
+int runorfire[3]={0,0,0};
+int score=0;
+int health=100;
 int backx0,backy0,backx1,backy1,frontx0,fronty0,frontx1,fronty1;
 enum {IDLE,FIRE};
-enum {jIDLE,jFIRE,jDEATH};
+enum {jIDLE,jRUN,jFIRE,jDEATH};
 int menu=1;
 int fire_idx=0;
 int menu_idx=0;
 int state=IDLE;
-int jstate=jIDLE;
+int jstate[3];
+char healthstring[100]="HEALTH= 0";
+char scorestring[100]="SCORE= 0";
 char gun_fire[15][100];
 char gun_idle[100];
 char* gun_image;
 char menupics[2100][100];
 char* menupic = "menu\\00001.bmp";
-int jagind=23;
+int jagind[3]={23,23,23};
 
 int sx[2], sz[4];
 int mx, my , mz ;
@@ -92,7 +108,7 @@ struct sectors{
     int st,ss;
 };
 
-sectors S[128];
+sectors S[128], S1[128];
 
 typedef struct 
 {
@@ -109,8 +125,8 @@ void load()
  fscanf(fp,"%i",&numSect);   
  for(s=0;s<numSect;s++)      
  {
-  fscanf(fp,"%i",&S[s].ws);  
-  fscanf(fp,"%i",&S[s].we); 
+  fscanf(fp,"%i",&S[s].ws);  S1[s].ws=S[s].ws;
+  fscanf(fp,"%i",&S[s].we);  S1[s].we=S[s].we;
   fscanf(fp,"%i",&S[s].wz1);  
   fscanf(fp,"%i",&S[s].wz2); 
   fscanf(fp,"%i",&S[s].st); 
@@ -128,8 +144,8 @@ void load()
   fscanf(fp,"%i",&W[s].v);  
   fscanf(fp,"%i",&W[s].shade);  
 
-  if(s%4==0 && s>11){backx0=W[s].wx0; backy0=W[s].wy0; backx1=W[s].wx1; backy1=W[s].wy1;}  
-  else if(s%2==0 && s>11){
+  if(s%4==0 && s>11 && s<227){backx0=W[s].wx0; backy0=W[s].wy0; backx1=W[s].wx1; backy1=W[s].wy1;}  
+  else if(s%2==0 && s>11 && s<227){
 
     frontx0=W[s].wx0; fronty0=W[s].wy0; frontx1=W[s].wx1; fronty1=W[s].wy1;
 
@@ -172,7 +188,7 @@ int dist(int x1,int y1, int x2,int y2);
     }
 }*/
 
-void iDraw() {
+void iDraw() {                                                                  
     iClear();
 
     if(menu==1){ iShowBMP2(0,0,menupic,-1);}
@@ -209,7 +225,7 @@ void iDraw() {
                 z1[0] = S[s].wz1 - mz;
                 z1[1] = S[s].wz1 - mz;
 
-                if(S[s].we-S[s].ws==2){
+                //if(S[s].we-S[s].ws==2){
 
                     /*int centerx = ((x1[0]+x1[1])/2);
                     int centery = ((y1_new[0]+y1_new[1])/2);
@@ -222,11 +238,11 @@ void iDraw() {
                     x1[1] = ((x1[0]+x1[1])/2) + hw*cos(atan(((((x1[0]+x1[1])/2)-mx)/((1.0)*(((y1_new[0]+y1_new[1])/2)-my)))));
 
                     y1_new[0] = ((y1_new[0]+y1_new[1])/2) + hw*sin(atan(((((x1[0]+x1[1])/2)-mx)/((1.0)*(((y1_new[0]+y1_new[1])/2)-my)))));
-                    y1_new[1] = ((y1_new[0]+y1_new[1])/2) - hw*sin(atan(((((x1[0]+x1[1])/2)-mx)/((1.0)*(((y1_new[0]+y1_new[1])/2)-my)))));*/
+                    y1_new[1] = ((y1_new[0]+y1_new[1])/2) - hw*sin(atan(((((x1[0]+x1[1])/2)-mx)/((1.0)*(((y1_new[0]+y1_new[1])/2)-my)))));}*/
 
                     //if(i==0){y1_new[1] -= 50 ;}
                     //if(i==1){y1_new[1] += 500 ;}
-                }
+                
 
                 if(i==1) {int temp=x1[0]; x1[0]=x1[1]; x1[1]=temp; temp=y1_new[0]; y1_new[0]=y1_new[1]; y1_new[1]=temp;} 
                 
@@ -281,9 +297,11 @@ void iDraw() {
             
         }
     }
-    iShowBMP2(800,80,gun_image,0);
-    iShowBMP2(900,550,"shotgun\\crosshair.bmp",0);
+    iShowBMP2(790,80,gun_image,0);
+    iShowBMP2(910,550,"shotgun\\crosshair.bmp",0);
     iShowBMP2(0,0,"shotgun\\status_bar.bmp",-1);
+    iText(100,900,scorestring,GLUT_BITMAP_TIMES_ROMAN_24);
+    iText(1500,900,healthstring,GLUT_BITMAP_TIMES_ROMAN_24);
     //testTextures();
 }}
 
@@ -302,7 +320,7 @@ void iDrawLine(int sx0, int sx1, int sz0, int sz1) {
 void iDrawWall(int sx0, int sx1, int sz0, int sz1, int sz2, int sz3, int red, int green, int blue, int s, int i, int w) {
 
     int screenx,screenz;
-    int wt = W[w].wt; if(wt==0){wt=jagind;}
+    int wt = W[w].wt; if(wt==200){wt=jagind[0];} if(wt==201){wt=jagind[1];} if(wt==202){wt=jagind[2];}
     float ht = 0, ht_step=(float)Textures[wt].w*W[w].u/(float)(sx1-sx0);
 
     int dy = sz1 - sz0;
@@ -341,7 +359,7 @@ void iDrawWall(int sx0, int sx1, int sz0, int sz1, int sz2, int sz3, int red, in
                 int red=Textures[wt].name[flag]-W[w].shade/2 ; if(red<0){red=0;} 
                 int green=Textures[wt].name[flag+1]-W[w].shade/2 ; //if(green<0){green=0;}
                 int blue=Textures[wt].name[flag+2]-W[w].shade/2 ; //if(blue<0){blue=0;}
-                if(W[w].wt==0 && 95<red && red<126 && 110<green && green<149 && 120<blue && blue<160){}
+                if((W[w].wt==200||W[w].wt==201||W[w].wt==202) && 95<red && red<126 && 110<green && green<149 && 120<blue && blue<160){}
                 else{iSetColor(red,green,blue);  //debug++; if(debug%100000000==0){printf("%d %d %d %d\n",red,green,blue,flag);}
                 iPoint(screenx,screenz);}
                 vt+=vt_step;
@@ -393,6 +411,17 @@ void inittexture(){
     Textures[29].name=(const unsigned char*)T_29; Textures[29].h=T_29_HEIGHT; Textures[29].w=T_29_WIDTH;
     Textures[30].name=(const unsigned char*)T_30; Textures[30].h=T_30_HEIGHT; Textures[30].w=T_30_WIDTH;
     Textures[31].name=(const unsigned char*)T_31; Textures[31].h=T_31_HEIGHT; Textures[31].w=T_31_WIDTH;
+    Textures[32].name=(const unsigned char*)T_32; Textures[32].h=T_32_HEIGHT; Textures[32].w=T_32_WIDTH;
+    Textures[33].name=(const unsigned char*)T_33; Textures[33].h=T_33_HEIGHT; Textures[33].w=T_33_WIDTH;
+    Textures[34].name=(const unsigned char*)T_34; Textures[34].h=T_34_HEIGHT; Textures[34].w=T_34_WIDTH;
+    Textures[35].name=(const unsigned char*)T_35; Textures[35].h=T_35_HEIGHT; Textures[35].w=T_35_WIDTH;
+    Textures[36].name=(const unsigned char*)T_36; Textures[36].h=T_36_HEIGHT; Textures[36].w=T_36_WIDTH;
+    Textures[37].name=(const unsigned char*)T_37; Textures[37].h=T_37_HEIGHT; Textures[37].w=T_37_WIDTH;
+    Textures[38].name=(const unsigned char*)T_38; Textures[38].h=T_38_HEIGHT; Textures[38].w=T_38_WIDTH;
+    Textures[39].name=(const unsigned char*)T_39; Textures[39].h=T_39_HEIGHT; Textures[39].w=T_39_WIDTH;
+    Textures[40].name=(const unsigned char*)T_40; Textures[40].h=T_40_HEIGHT; Textures[40].w=T_40_WIDTH;
+    Textures[41].name=(const unsigned char*)T_41; Textures[41].h=T_41_HEIGHT; Textures[41].w=T_41_WIDTH;
+    Textures[42].name=(const unsigned char*)T_42; Textures[42].h=T_42_HEIGHT; Textures[42].w=T_42_WIDTH;
     
     /*char texture_name[100];
     char texture_height[100];
@@ -407,7 +436,6 @@ void inittexture(){
     }*/
 
 }
-
 
 
 void populate_gun_images(){
@@ -448,9 +476,54 @@ void update_menu(){
 }
 
 void update_jaguar(){
-   if(jstate==jIDLE) {jagind++; if(jagind>26){jagind=23;}}
-   else if(jstate==jFIRE) {jagind++; if(jagind>22){jagind=20;}}
-   else if(jstate==jDEATH) {jagind++; if(jagind>31){jagind=31;}}
+
+        for(int i=0; i<2; i++){
+            if(jstate[i]==jIDLE) {jagind[i]=20;}
+        else if(jstate[i]==jRUN) {jagind[i]++; if(jagind[i]>26){jagind[i]=23;}}
+        else if(jstate[i]==jFIRE) {jagind[i]++; if(jagind[i]>22){jagind[i]=20;} if(jagind[i]==21){health--; sprintf(healthstring,"HEALTH: %d",health);}}
+        else if(jstate[i]==jDEATH) {jagind[i]++; if(jagind[i]>31){jagind[i]=31;} if(jagind[i]==29){score++; sprintf(scorestring,"SCORE: %d",score);}}
+        }
+
+        for(int i=2; i<3; i++){
+            if(jstate[i]==jIDLE) {jagind[i]=32;}
+        else if(jstate[i]==jRUN) {jagind[i]++; if(jagind[i]>38){jagind[i]=35;}}
+        else if(jstate[i]==jFIRE) {jagind[i]++; if(jagind[i]>34){jagind[i]=32;} if(jagind[i]==33){health--; sprintf(healthstring,"HEALTH: %d",health);}}
+        else if(jstate[i]==jDEATH) {jagind[i]++; if(jagind[i]>42){jagind[i]=42;} if(jagind[i]==39){score++; sprintf(scorestring,"SCORE: %d",score);}}
+        }
+
+        /*if(jstate[0]==jIDLE) {jagind[0]++; if(jagind[0]>26){jagind[0]=23;}}
+        else if(jstate[0]==jFIRE) {jagind[0]++; if(jagind[0]>22){jagind[0]=20;}}
+        else if(jstate[0]==jDEATH) {jagind[0]++; if(jagind[0]>31){jagind[0]=31;}}
+
+        if(jstate[1]==jIDLE) {jagind[1]++; if(jagind[1]>26){jagind[1]=23;}}
+        else if(jstate[1]==jFIRE) {jagind[1]++; if(jagind[1]>22){jagind[1]=20;}}
+        else if(jstate[1]==jDEATH) {jagind[1]++; if(jagind[1]>31){jagind[1]=31;}}
+
+        if(jstate[2]==jIDLE) {jagind[2]++; if(jagind[2]>26){jagind[2]=23;}}
+        else if(jstate[2]==jFIRE) {jagind[2]++; if(jagind[2]>22){jagind[2]=20;}}
+        else if(jstate[2]==jDEATH) {jagind[2]++; if(jagind[2]>31){jagind[2]=31;}}*/
+   
+}
+
+void update_jstate(){
+    for(int i=0; i<3; i++){
+        if(jstate[i]!=jDEATH){
+        int seeflag=0;
+        int jx0 = W[S1[i+55].ws].wx0;
+        int jx1 = W[S1[i+55].ws].wx1;
+        int jx = (jx0+jx1)/2;
+        int jy = W[S1[i+55].ws].wy0;
+        for(int k=my; k<jy; k++){
+            int j = mx + (jx0-mx)*(k-my)/(jy-my);
+            if(access[j][k]==1){seeflag++; printf("j %d k %d mx %d my %d jx %d jy %d \n",j,k,mx,my,jx,jy); jstate[i]=jIDLE; break;}
+        }
+        if(seeflag==0){
+            runorfire[i]++;
+            if(runorfire[i]>5){ runorfire[i]=0; jstate[i]=jFIRE;}
+            else{jstate[i]=jRUN;}
+        }
+        }
+    }
 }
 
 void iKeyboard(unsigned char key) {
@@ -470,14 +543,30 @@ void iKeyboard(unsigned char key) {
     if(key == 't') {mz+=4;}
     if(key == 'g') {mz-=4;}
 
-    if(key == 'f') {state=FIRE; int bx = (288-my)*tan(t) + mx; if(bx<316 && bx>300){jstate=jDEATH; jagind=24;}}
+    if(key == 'f') {
+        if(state!=FIRE){
+        state=FIRE; 
+        
+        for(int i=0; i<3; i++){
+            if(jstate[i]!=jIDLE){
+                state=FIRE; 
+                int bx = (W[S1[i+55].ws].wy0-my)*tan(t) + mx; 
+                if(bx<(W[S1[i+55].ws].wx1-2) && bx>(W[S1[i+55].ws].wx0+12) && jstate[i]!=jDEATH){
+                    jstate[i]=jDEATH; 
+                    if(i==2){jagind[i]=35;}
+                    else{jagind[i]=24;}
+                }
+            }
+        }
+        }
+    }
 
     if(key == 'b') {for(int i=0; i<1000; i++){for(int j=0; j<1000; j++){access[i][j]=0;}} load(); /*for(int i=0; i<600; i++){ int sum=0; for(int j=0; j<=600; j++){sum+=access[i][j];}printf("%d\n",sum);}*/ }
     if(key == 'c') {menu=0;}
 
-    if(key == 'v') {jstate=jIDLE; jagind=23;}
-    if(key == 'n') {jstate=jFIRE; jagind=20;}
-    if(key == 'm') {jstate=jDEATH; jagind=27;}
+    /*if(key == 'v') {for(int i=0; i<3; i++){jstate[i]=jRUN; jagind[i]=23;}}
+    if(key == 'n') {for(int i=0; i<3; i++){jstate[i]=jFIRE; jagind[i]=20;}}
+    if(key == 'm') {for(int i=0; i<3; i++){jstate[i]=jDEATH; jagind[i]=27;}}*/
 
 	}
 
@@ -535,13 +624,15 @@ void check(){
 int main() {
 
     //initwalls();
+    srand(time(0));
     inittexture();
     populate_gun_images();
     populate_menu_images();
     iSetTimer(100, update_gun);
     iSetTimer(57, update_menu);
     iSetTimer(150,update_jaguar);
-    iSetTimer(3000, check);
+    iSetTimer(600,update_jstate);
+    //iSetTimer(3000, check);
     mx=0,my=0,mz=0;
     //float t=0,g=0;
 

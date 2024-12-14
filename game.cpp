@@ -55,6 +55,7 @@ int numSect= 0;
 int numWall= 0;         
 
 int access[1000][1000]; 
+int runorfire[3]={0,0,0};
 int score=0;
 int health=100;
 int backx0,backy0,backx1,backy1,frontx0,fronty0,frontx1,fronty1;
@@ -143,8 +144,8 @@ void load()
   fscanf(fp,"%i",&W[s].v);  
   fscanf(fp,"%i",&W[s].shade);  
 
-  if(s%4==0 && s>11){backx0=W[s].wx0; backy0=W[s].wy0; backx1=W[s].wx1; backy1=W[s].wy1;}  
-  else if(s%2==0 && s>11){
+  if(s%4==0 && s>11 && s<227){backx0=W[s].wx0; backy0=W[s].wy0; backx1=W[s].wx1; backy1=W[s].wy1;}  
+  else if(s%2==0 && s>11 && s<227){
 
     frontx0=W[s].wx0; fronty0=W[s].wy0; frontx1=W[s].wx1; fronty1=W[s].wy1;
 
@@ -512,14 +513,13 @@ void update_jstate(){
         int jx1 = W[S1[i+55].ws].wx1;
         int jx = (jx0+jx1)/2;
         int jy = W[S1[i+55].ws].wy0;
-        for(int i=my; i<jy; i++){
-            int j = mx + (jx-mx)*(j-my)/(jy-my);
-            if(access[j][i]==1){seeflag++; jstate[i]=jIDLE; break;}
+        for(int k=my; k<jy; k++){
+            int j = mx + (jx0-mx)*(k-my)/(jy-my);
+            if(access[j][k]==1){seeflag++; printf("j %d k %d mx %d my %d jx %d jy %d \n",j,k,mx,my,jx,jy); jstate[i]=jIDLE; break;}
         }
         if(seeflag==0){
-            static int runorfire = 0;
-            runorfire++;
-            if(runorfire%5==0){jstate[i]=jFIRE;}
+            runorfire[i]++;
+            if(runorfire[i]>5){ runorfire[i]=0; jstate[i]=jFIRE;}
             else{jstate[i]=jRUN;}
         }
         }
@@ -564,9 +564,9 @@ void iKeyboard(unsigned char key) {
     if(key == 'b') {for(int i=0; i<1000; i++){for(int j=0; j<1000; j++){access[i][j]=0;}} load(); /*for(int i=0; i<600; i++){ int sum=0; for(int j=0; j<=600; j++){sum+=access[i][j];}printf("%d\n",sum);}*/ }
     if(key == 'c') {menu=0;}
 
-    if(key == 'v') {for(int i=0; i<3; i++){jstate[i]=jRUN; jagind[i]=23;}}
+    /*if(key == 'v') {for(int i=0; i<3; i++){jstate[i]=jRUN; jagind[i]=23;}}
     if(key == 'n') {for(int i=0; i<3; i++){jstate[i]=jFIRE; jagind[i]=20;}}
-    if(key == 'm') {for(int i=0; i<3; i++){jstate[i]=jDEATH; jagind[i]=27;}}
+    if(key == 'm') {for(int i=0; i<3; i++){jstate[i]=jDEATH; jagind[i]=27;}}*/
 
 	}
 
@@ -632,7 +632,7 @@ int main() {
     iSetTimer(57, update_menu);
     iSetTimer(150,update_jaguar);
     iSetTimer(600,update_jstate);
-    iSetTimer(3000, check);
+    //iSetTimer(3000, check);
     mx=0,my=0,mz=0;
     //float t=0,g=0;
 
