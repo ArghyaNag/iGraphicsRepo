@@ -55,18 +55,22 @@ int numSect= 0;
 int numWall= 0;         
 
 int access[1000][1000]; 
+int leaderboard[5], leadcount=0;
 int runorfire[3]={0,0,0};
 int score=0;
+int timer=0;
 int health=100;
 int backx0,backy0,backx1,backy1,frontx0,fronty0,frontx1,fronty1;
 enum {IDLE,FIRE};
 enum {jIDLE,jRUN,jFIRE,jDEATH};
-int menu=1;
+int menu=0;
 int fire_idx=0;
 int menu_idx=0;
 int state=IDLE;
 int jstate[3];
+char leaderstring[5][100];
 char healthstring[100]="HEALTH= 0";
+char timerstring[100]="00:00:00";
 char scorestring[100]="SCORE= 0";
 char gun_fire[15][100];
 char gun_idle[100];
@@ -175,6 +179,7 @@ void iDrawLine(int sx0, int sx1, int sz0, int sz1);
 void iDrawWall(int sx0, int sx1, int sz0, int sz1, int sz2, int sz3, int red, int green, int blue, int s, int i, int w);
 void clipBehindPlayer(int *x1,int *y1,int *z1, int x2,int y2,int z2);
 int dist(int x1,int y1, int x2,int y2);
+void update_leaderboard(); 
 
 /*void testTextures(){
     int x,y,t;
@@ -191,9 +196,9 @@ int dist(int x1,int y1, int x2,int y2);
 void iDraw() {                                                                  
     iClear();
 
-    if(menu==1){ iShowBMP2(0,0,menupic,-1);}
+    if(menu==0){ iShowBMP2(0,0,menupic,-1);}
 
-    if(menu==0){
+    if(menu==1 && score<3){
     int ax[2] = {40, 40}, ay[2] = {10, 290}, az[2] = {0, 0}, loop;
     int x1[2], y1_new[2], z1[2];
     int px[4], py[4], pz[4];
@@ -297,14 +302,30 @@ void iDraw() {
             
         }
     }
-    iShowBMP2(790,80,gun_image,0);
-    iShowBMP2(910,550,"shotgun\\crosshair.bmp",0);
-    iShowBMP2(0,0,"shotgun\\status_bar.bmp",-1);
-    iSetColor(100,255,100);
-    iText(100,900,scorestring,GLUT_BITMAP_TIMES_ROMAN_24);
-    iText(1500,900,healthstring,GLUT_BITMAP_TIMES_ROMAN_24);
-    //testTextures();
-}}
+        iShowBMP2(790,80,gun_image,0);
+        iShowBMP2(910,550,"shotgun\\crosshair.bmp",0);
+        iShowBMP2(0,0,"shotgun\\status_bar.bmp",-1);
+        iSetColor(100,255,100);
+        iText(100,900,scorestring,GLUT_BITMAP_TIMES_ROMAN_24);
+        iText(1500,900,healthstring,GLUT_BITMAP_TIMES_ROMAN_24);
+        iText(800,900,timerstring,GLUT_BITMAP_TIMES_ROMAN_24);
+        //testTextures();
+    }
+    if(score==3 && menu==1){
+        iSetColor(100,255,100);
+        iText(800,600,"GAME OVER");
+        if(leadcount==0){update_leaderboard(); leadcount++;}
+    }
+    if(menu==2){
+        iShowBMP(0,0,"shotgun\\leaderboard.bmp");
+        iSetColor(100,255,100);
+        iText(1000,700,leaderstring[0],GLUT_BITMAP_TIMES_ROMAN_24);
+        iText(1000,600,leaderstring[1],GLUT_BITMAP_TIMES_ROMAN_24);
+        iText(1000,500,leaderstring[2],GLUT_BITMAP_TIMES_ROMAN_24);
+        iText(1000,400,leaderstring[3],GLUT_BITMAP_TIMES_ROMAN_24);
+        iText(1000,300,leaderstring[4],GLUT_BITMAP_TIMES_ROMAN_24);
+    }
+}
 
 
 
@@ -438,6 +459,49 @@ void inittexture(){
 
 }
 
+void initialize_leaderboard(){
+    FILE *fp3 = fopen("leaderboard.h","r");
+    if(fp3 == NULL){return;}
+
+    for(int i=0; i<5; i++){
+        fscanf(fp3,"%d",&leaderboard[i]);
+        sprintf(leaderstring[i],"%02d:%02d:%02d",(leaderboard[i]/3600),(leaderboard[i]%3600)/60,(leaderboard[i]%60));
+    }
+    fclose(fp3);
+}
+
+void update_leaderboard(){
+    FILE *fp1 = fopen("leaderboard.h","r");
+    if(fp1 == NULL){return;}
+
+    for(int i=0; i<5; i++){
+        fscanf(fp1,"%d",&leaderboard[i]);
+    }
+    fclose(fp1);
+
+    FILE *fp2 = fopen("leaderboard.h","w");
+    if(fp2 == NULL){return;}
+    int leadflag=0;
+
+    for(int i=0; i<5; i++){
+        if(leaderboard[i]>timer && leadflag==0){
+            fprintf(fp2,"%d ",timer); leadflag++;
+            fprintf(fp2,"%d ",leaderboard[i]);
+        }
+        else{fprintf(fp2,"%d ",leaderboard[i]);}
+    }
+    fclose(fp2);
+
+    FILE *fp3 = fopen("leaderboard.h","r");
+    if(fp3 == NULL){return;}
+
+    for(int i=0; i<5; i++){
+        fscanf(fp3,"%d",&leaderboard[i]);
+        sprintf(leaderstring[i],"%02d:%02d:%02d",(leaderboard[i]/3600),(leaderboard[i]%3600)/60,(leaderboard[i]%60));
+    }
+    fclose(fp3);
+
+}
 
 void populate_gun_images(){
     sprintf(gun_idle, "shotgun\\file_0-triangle.bmp");
@@ -563,7 +627,10 @@ void iKeyboard(unsigned char key) {
     }
 
     if(key == 'b') {for(int i=0; i<1000; i++){for(int j=0; j<1000; j++){access[i][j]=0;}} load(); /*for(int i=0; i<600; i++){ int sum=0; for(int j=0; j<=600; j++){sum+=access[i][j];}printf("%d\n",sum);}*/ }
-    if(key == 'c') {menu=0;}
+    if(key == 'c') {menu=1; score=0; timer=0; health=100; for(int i=0; i<3; i++){jstate[i]=jRUN; jagind[i]=23;} sprintf(healthstring,"HEALTH: %d",health); sprintf(scorestring,"SCORE: %d",score); load();} 
+    if(key == 'q' && score==3 && menu==1) {menu=2;}
+    if(key == 'h' && menu==0) {menu=2;}
+    if(key == 'x' && menu==2) {menu=0;} 
 
     /*if(key == 'v') {for(int i=0; i<3; i++){jstate[i]=jRUN; jagind[i]=23;}}
     if(key == 'n') {for(int i=0; i<3; i++){jstate[i]=jFIRE; jagind[i]=20;}}
@@ -592,6 +659,11 @@ void clipBehindPlayer(int *x1,int *y1,int *z1, int x2,int y2,int z2)
  *x1 = *x1 + s*(x2-(*x1));
  *y1 = *y1 + s*(y2-(*y1)); if(*y1==0){ *y1=1;} 
  *z1 = *z1 + s*(z2-(*z1));
+}
+
+void update_time(){
+    timer++;
+    sprintf(timerstring,"%02d:%02d:%02d",(timer/3600),(timer%3600)/60,(timer%60));
 }
 
 void iMouseMove(int mx, int my) {
@@ -625,6 +697,7 @@ void check(){
 int main() {
 
     //initwalls();
+    initialize_leaderboard();
     srand(time(0));
     inittexture();
     populate_gun_images();
@@ -633,6 +706,7 @@ int main() {
     iSetTimer(57, update_menu);
     iSetTimer(150,update_jaguar);
     iSetTimer(600,update_jstate);
+    iSetTimer(17,update_time);
     //iSetTimer(3000, check);
     mx=0,my=0,mz=0;
     //float t=0,g=0;
