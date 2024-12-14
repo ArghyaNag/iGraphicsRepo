@@ -94,7 +94,7 @@ struct walls{
     int shade;
 };
 
-walls W[256];
+walls W[600];
 
 struct sectors{
     int ws,we;
@@ -510,10 +510,10 @@ void update_jstate(){
     for(int i=0; i<3; i++){
         if(jstate[i]!=jDEATH){
         int seeflag=0;
-        int jx0 = W[S1[i+55].ws].wx0;
-        int jx1 = W[S1[i+55].ws].wx1;
+        int jx0 = W[S1[i+101].ws].wx0;
+        int jx1 = W[S1[i+101].ws].wx1;
         int jx = (jx0+jx1)/2;
-        int jy = W[S1[i+55].ws].wy0;
+        int jy = W[S1[i+101].ws].wy0;
         for(int k=my; k<jy; k++){
             int j = mx + (jx0-mx)*(k-my)/(jy-my);
             if(access[j][k]==1){seeflag++; printf("j %d k %d mx %d my %d jx %d jy %d \n",j,k,mx,my,jx,jy); jstate[i]=jIDLE; break;}
@@ -551,8 +551,8 @@ void iKeyboard(unsigned char key) {
         for(int i=0; i<3; i++){
             if(jstate[i]!=jIDLE){
                 state=FIRE; 
-                int bx = (W[S1[i+55].ws].wy0-my)*tan(t) + mx; 
-                if(bx<(W[S1[i+55].ws].wx1-2) && bx>(W[S1[i+55].ws].wx0+12) && jstate[i]!=jDEATH){
+                int bx = (W[S1[i+101].ws].wy0-my)*tan(t) + mx; 
+                if(bx<(W[S1[i+101].ws].wx1-2) && bx>(W[S1[i+101].ws].wx0+12) && jstate[i]!=jDEATH){
                     jstate[i]=jDEATH; 
                     if(i==2){jagind[i]=35;}
                     else{jagind[i]=24;}
